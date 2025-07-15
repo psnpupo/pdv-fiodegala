@@ -1,0 +1,1 @@
+create table user_roles (id uuid primary key default gen_random_uuid(), user_id uuid references auth.users(id), role text not null, store_id uuid references stores(id), active boolean default true, created_at timestamptz default now());
