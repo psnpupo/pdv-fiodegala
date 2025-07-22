@@ -62,7 +62,7 @@ const ProductVariationsForm = ({
             <div><Label htmlFor={`variation_price_${index}`}>Preço Variação (opcional)</Label><Input id={`variation_price_${index}`} type="number" step="0.01" value={variation.price || ''} onChange={(e) => handleVariationChange(index, 'price', e.target.value)} placeholder="Usar preço principal" /></div>
             <div><Label htmlFor={`variation_price_varejo_${index}`}>Preço Varejo</Label><Input id={`variation_price_varejo_${index}`} type="number" step="0.01" value={variation.price_varejo || ''} onChange={(e) => handleVariationChange(index, 'price_varejo', e.target.value)} /></div>
             <div><Label htmlFor={`variation_price_atacado_${index}`}>Preço Atacado</Label><Input id={`variation_price_atacado_${index}`} type="number" step="0.01" value={variation.price_atacado || ''} onChange={(e) => handleVariationChange(index, 'price_atacado', e.target.value)} /></div>
-            <div><Label htmlFor={`variation_price_atacarejo_${index}`}>Preço Atacarejo</Label><Input id={`variation_price_atacarejo_${index}`} type="number" step="0.01" value={variation.price_atacarejo || ''} onChange={(e) => handleVariationChange(index, 'price_atacarejo', e.target.value)} /></div>
+            <div><Label htmlFor={`variation_price_atacarejo_${index}`}>Cliente Exclusivo</Label><Input id={`variation_price_atacarejo_${index}`} type="number" step="0.01" value={variation.price_atacarejo || ''} onChange={(e) => handleVariationChange(index, 'price_atacarejo', e.target.value)} /></div>
           </div>
           <div>
             <Label htmlFor={`variation_stock_${index}`}>Estoque da Variação *</Label>
