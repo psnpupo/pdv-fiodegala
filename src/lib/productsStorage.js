@@ -177,6 +177,40 @@ export const getProductByBarcode = async (barcode) => {
   return data;
 };
 
+export const getProductById = async (productId) => {
+  // Busca produto principal
+  const { data: product, error } = await supabase
+    .from('products')
+    .select('*, stores(name, is_online_store)')
+    .eq('id', productId)
+    .single();
+  if (error || !product) {
+    console.error('Erro ao buscar produto por ID:', error);
+    return null;
+  }
+  // Busca variações se for variável
+  if (product.product_type === 'variable') {
+    const { data: variations, error: varError } = await supabase
+      .from('product_variations')
+      .select('*')
+      .eq('product_id', productId);
+    if (varError) console.error('Erro ao buscar variações:', varError);
+    product.variations = variations || [];
+  } else {
+    product.variations = [];
+  }
+  // Busca imagens extras (se houver tabela/relacionamento)
+  // Exemplo: product_images (ajuste conforme seu schema)
+  if (supabase.from('product_images')) {
+    const { data: images, error: imgError } = await supabase
+      .from('product_images')
+      .select('*')
+      .eq('product_id', productId);
+    if (!imgError) product.images = images;
+  }
+  return product;
+};
+
 export const getProductStoreStock = async (productId, storeId = null, variationId = null) => {
   let query = supabase
     .from('product_store_stock')
@@ -295,4 +329,15 @@ export const recalculateOnlineStock = async (productId) => {
             console.error("Error updating online/general stock:", updateError);
         }
     }
+};
+
+export const deleteProduct = async (productId) => {
+  // Remove produto principal
+  await supabase.from('products').delete().eq('id', productId);
+  // Remove variações
+  await supabase.from('product_variations').delete().eq('product_id', productId);
+  // Remove imagens extras (se houver tabela)
+  if (supabase.from('product_images')) {
+    await supabase.from('product_images').delete().eq('product_id', productId);
+  }
 };

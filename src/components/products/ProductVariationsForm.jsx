@@ -47,7 +47,17 @@ const ProductVariationsForm = ({
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div><Label htmlFor={`variation_sku_${index}`}>SKU da Variação</Label><Input id={`variation_sku_${index}`} value={variation.sku || ''} onChange={(e) => handleVariationChange(index, 'sku', e.target.value)} /></div>
-            <div><Label htmlFor={`variation_barcode_${index}`}>Cód. Barras Variação</Label><Input id={`variation_barcode_${index}`} value={variation.barcode || ''} onChange={(e) => handleVariationChange(index, 'barcode', e.target.value)} /></div>
+            <div><Label htmlFor={`variation_barcode_${index}`}>Cód. Barras Variação</Label><Input id={`variation_barcode_${index}`} value={variation.barcode || ''} onChange={(e) => handleVariationChange(index, 'barcode', e.target.value)} 
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  // Opcional: mover foco para o próximo campo
+                  const next = e.target.closest('form')?.querySelector(`#variation_referencia_${index}`);
+                  if (next) next.focus();
+                }
+              }}
+            /></div>
             <div><Label htmlFor={`variation_referencia_${index}`}>Referência</Label><Input id={`variation_referencia_${index}`} value={variation.referencia || ''} onChange={(e) => handleVariationChange(index, 'referencia', e.target.value)} /></div>
             <div><Label htmlFor={`variation_price_${index}`}>Preço Variação (opcional)</Label><Input id={`variation_price_${index}`} type="number" step="0.01" value={variation.price || ''} onChange={(e) => handleVariationChange(index, 'price', e.target.value)} placeholder="Usar preço principal" /></div>
             <div><Label htmlFor={`variation_price_varejo_${index}`}>Preço Varejo</Label><Input id={`variation_price_varejo_${index}`} type="number" step="0.01" value={variation.price_varejo || ''} onChange={(e) => handleVariationChange(index, 'price_varejo', e.target.value)} /></div>

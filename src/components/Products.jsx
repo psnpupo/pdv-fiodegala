@@ -7,7 +7,9 @@ import {
   addProduct, 
   updateProduct, 
   getAllProducts, 
-  getProductStoreStock
+  getProductStoreStock,
+  getProductById, // ADICIONADO
+  deleteProduct // ADICIONADO
 } from '@/lib/productsStorage'; // Atualizado
 import { getCurrentUser, getStores } from '@/lib/auth'; // getStores importado de auth
 import { Search, PackagePlus } from 'lucide-react';
@@ -156,34 +158,42 @@ const Products = () => {
     }
   };
 
-  const handleEdit = (product) => {
-    setEditingProduct(product);
-    setFormData({
-      name: product.name,
-      category: product.category || '',
-      brand: product.brand || '',
-      barcode: product.barcode,
-      sizes: product.sizes?.join(', ') || '',
-      colors: product.colors?.join(', ') || '',
-      price: product.price.toString(),
-      stock: product.stock.toString(), 
-      min_stock: product.min_stock.toString(),
-      active: product.active
-    });
-    setShowFormDialog(true);
+  const handleEdit = async (product) => {
+    setLoading(true);
+    try {
+      const fullProduct = await getProductById(product.id);
+      setEditingProduct(fullProduct);
+      setFormData({
+        name: fullProduct.name,
+        category: fullProduct.category || '',
+        brand: fullProduct.brand || '',
+        barcode: fullProduct.barcode,
+        sizes: fullProduct.sizes?.join(', ') || '',
+        colors: fullProduct.colors?.join(', ') || '',
+        price: fullProduct.price.toString(),
+        stock: fullProduct.stock.toString(), 
+        min_stock: fullProduct.min_stock.toString(),
+        active: fullProduct.active
+      });
+      setShowFormDialog(true);
+    } catch (error) {
+      toast({ title: 'Erro ao buscar produto para edição', description: error.message, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = async (productId) => {
-    if (!window.confirm("Tem certeza que deseja desativar este produto? Ele não será removido permanentemente.")) {
+    if (!window.confirm("Deseja realmente excluir este produto? Esta ação é irreversível!")) {
         return;
     }
     setLoading(true);
     try {
-      await updateProduct(productId, { active: false });
-      toast({ title: "Produto desativado!", description: "O produto foi marcado como inativo." });
+      await deleteProduct(productId);
+      toast({ title: "Produto excluído!", description: "O produto foi removido do sistema." });
       fetchProductsAndStoresData(); 
     } catch (error) {
-      toast({ title: "Erro ao desativar produto", description: error.message, variant: "destructive" });
+      toast({ title: "Erro ao excluir produto", description: error.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
