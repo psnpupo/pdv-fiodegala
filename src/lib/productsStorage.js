@@ -141,14 +141,13 @@ export const updateProduct = async (productId, productData) => {
   }
 
   if (updatedProduct && updatedProduct.product_type === 'variable') {
-    // Delete existing variations for simplicity, then re-add. More complex logic could update/insert/delete individually.
+    // Delete existing variations for simplicity, then re-add. Mais seguro: nunca envie o campo id!
     await supabase.from('product_variations').delete().eq('product_id', productId);
     if (variations && variations.length > 0) {
-      const variationsToInsert = variations.map(v => ({
-        ...v,
-        product_id: productId,
-        id: undefined // Ensure new IDs are generated if they were passed from frontend state
-      }));
+      const variationsToInsert = variations.map(v => {
+        const { id, ...rest } = v; // Remove id explicitamente
+        return { ...rest, product_id: productId };
+      });
       const { error: variationsError } = await supabase.from('product_variations').insert(variationsToInsert);
       if (variationsError) {
         console.error('Error updating product variations:', variationsError);
