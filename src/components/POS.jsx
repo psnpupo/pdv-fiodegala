@@ -1,22 +1,23 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { 
-  addSale, 
-  getCurrentCashRegisterState, 
   addCashRegisterLog, 
-  getProductByBarcode as fetchProductByBarcodeForPOS, // Renomeado para clareza
   getProductStoreStock // Para verificar estoque da loja física no carrinho
-} from '@/lib/storage'; 
+} from '@/lib/storage';
+import { getCurrentCashRegisterState } from '@/lib/cashRegisterStorage';
+import { createSale, getProductByBarcode as fetchProductByBarcodeForPOS } from '@/lib/salesApi'; 
 import { getCurrentUser, hasPermission, PERMISSIONS, getUsers } from '@/lib/auth';
 
 import BarcodeScanner from '@/components/pos/BarcodeScanner';
 import CartDisplay from '@/components/pos/CartDisplay';
 import PosTotals from '@/components/pos/PosTotals';
 import PaymentSection, { PAYMENT_METHODS, PAYMENT_LABELS } from '@/components/pos/PaymentSection';
-import CashRegisterControls from '@/components/pos/CashRegisterControls';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DollarSign } from 'lucide-react';
 
 const SALE_MODALITIES = [
   { value: 'varejo', label: 'Varejo' },
@@ -31,6 +32,7 @@ const POS = () => {
   const [discount, setDiscount] = useState({ type: 'percentage', value: 0 });
   const [payments, setPayments] = useState([]);
   const [cashRegister, setCashRegister] = useState({ isOpen: false, currentAmount: 0, openingAmount: 0, id: null, store_id: null });
+  const [selectedStore, setSelectedStore] = useState(null);
   const { toast } = useToast();
   const user = getCurrentUser();
   const isUserPhysicalStore = !!user?.store_id && !hasPermission(user.role, PERMISSIONS.VIEW_ALL_STORES_DATA);
@@ -87,7 +89,7 @@ const POS = () => {
           onClick={async () => {
             setFinalizando(true);
             try {
-              // Montar dados para o Supabase
+              // Montar dados para o backend
               const saleData = {
                 items: cart.map(ci => ({
                   productId: ci.productId,
@@ -107,21 +109,33 @@ const POS = () => {
                 })),
                 cashier: user?.name,
                 cashierId: user?.id,
-                store_id: cashRegister.store_id || (isUserPhysicalStore ? user.store_id : null),
+                store_id: selectedStore?.id || user?.store_id || null,
                 modalidade,
                 vendedor_id: vendedor?.id,
                 tipo_venda: isTroca ? 'troca' : 'normal',
               };
-              await addSale(saleData);
+              
+              const result = await createSale(saleData);
+              
+              // Limpar carrinho e resetar wizard
               clearCart();
               setIsTroca(false);
               setStep(0);
               setVendedor(null);
               setPagamentosWizard([{ method: '', amount: '', parcelas: 1 }, { method: '', amount: '', parcelas: 1 }]);
               setNumPagamentos(1);
-              toast({ title: 'Venda finalizada com sucesso!', description: '', variant: 'success' });
+              
+              toast({ 
+                title: 'Venda finalizada com sucesso!', 
+                description: `Venda #${result.sale.id} criada.`, 
+                variant: 'default' 
+              });
             } catch (err) {
-              toast({ title: 'Erro ao finalizar venda', description: err.message || 'Tente novamente.', variant: 'destructive' });
+              toast({ 
+                title: 'Erro ao finalizar venda', 
+                description: err.message || 'Tente novamente.', 
+                variant: 'destructive' 
+              });
             } finally {
               setFinalizando(false);
             }
@@ -158,7 +172,15 @@ const POS = () => {
     // Por simplicidade, se for admin, e não houver caixa específico, ele pode ver o último caixa aberto.
     const state = await getCurrentCashRegisterState(); 
     setCashRegister(state);
-  }, []);
+    
+    // Definir loja selecionada baseada no usuário
+    if (isUserPhysicalStore && user?.store_id) {
+      setSelectedStore({ id: user.store_id, name: user.store_name || 'Loja Física' });
+    } else {
+      // Para admin/online, usar loja online por padrão
+      setSelectedStore({ id: null, name: 'Loja Online' });
+    }
+  }, [isUserPhysicalStore, user?.store_id, user?.store_name]);
 
   useEffect(() => {
     fetchCashRegisterData();
@@ -488,10 +510,39 @@ const POS = () => {
           remainingAmount={getRemainingAmount()}
           onAddPayment={addPayment}
         />
-        <CashRegisterControls 
-          cashRegister={cashRegister}
-          currentUser={user}
-        />
+        {/* Controle de caixa movido para página exclusiva */}
+        <Card className="glass-effect">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <DollarSign className="w-5 h-5" />
+              <span>Status do Caixa</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground">Status</p>
+              <p className={`font-bold ${cashRegister.isOpen ? 'text-green-600' : 'text-red-600'}`}>
+                {cashRegister.isOpen ? 'ABERTO' : 'FECHADO'}
+              </p>
+              {cashRegister.isOpen && (
+                <p className="text-lg font-bold">
+                  R$ {cashRegister.currentAmount.toFixed(2)}
+                </p>
+              )}
+            </div>
+            
+            <div className="text-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.location.href = '/cash-register'}
+                className="w-full"
+              >
+                Gerenciar Caixa
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

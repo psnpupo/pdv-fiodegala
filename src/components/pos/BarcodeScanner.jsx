@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Scan, Plus } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { getProductByBarcode } from '@/lib/storage';
+import { getProductByBarcode } from '@/lib/salesApi';
 
 const BarcodeScanner = ({ onProductFound }) => {
   const [barcode, setBarcode] = useState('');
@@ -14,27 +14,43 @@ const BarcodeScanner = ({ onProductFound }) => {
     e.preventDefault();
     if (!barcode.trim()) return;
 
-    const product = await getProductByBarcode(barcode);
-    if (product) {
-      onProductFound(product);
-      setBarcode('');
-    } else {
+    try {
+      const result = await getProductByBarcode(barcode);
+      if (result && result.product) {
+        onProductFound(result.product);
+        setBarcode('');
+      } else {
+        toast({
+          title: "Produto não encontrado",
+          description: `Código de barras: ${barcode}`,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
       toast({
-        title: "Produto não encontrado",
-        description: `Código de barras: ${barcode}`,
+        title: "Erro ao buscar produto",
+        description: error.message,
         variant: "destructive",
       });
     }
   };
   
   const quickAddProduct = async (testBarcode) => {
-    const product = await getProductByBarcode(testBarcode);
-    if (product) {
-      onProductFound(product);
-    } else {
+    try {
+      const result = await getProductByBarcode(testBarcode);
+      if (result && result.product) {
+        onProductFound(result.product);
+      } else {
+        toast({
+          title: "Produto de teste não encontrado",
+          description: `Código: ${testBarcode}`,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
       toast({
-        title: "Produto de teste não encontrado",
-        description: `Código: ${testBarcode}`,
+        title: "Erro ao buscar produto de teste",
+        description: error.message,
         variant: "destructive",
       });
     }

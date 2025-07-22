@@ -69,8 +69,8 @@ const Login = ({ onLogin }) => {
         <Card className="glass-effect neon-glow">
           <CardHeader className="text-center">
             {/* Logo Fio de Gala */}
-            <img src="/images/logo.webp" alt="Fio de Gala" className="mx-auto mb-4 w-24 h-24 object-contain" />
-            <CardTitle className="text-2xl font-bold text-white">Sistema PDV</CardTitle>
+            <img src="/images/logobranca fdg.png" alt="Fio de Gala" className="mx-auto mb-4 w-32 h-32 object-contain" />
+            <CardTitle className="text-2xl font-bold text-white">FDG System</CardTitle>
             <CardDescription className="text-gray-300">
               Faça login para acessar o sistema
             </CardDescription>

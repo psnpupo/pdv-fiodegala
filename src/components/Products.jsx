@@ -81,58 +81,75 @@ const Products = () => {
     setEditingProduct(null);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (productData) => {
+    console.log('🚀 Iniciando criação de produto...');
+    console.log('📋 Dados recebidos:', productData);
     
-    const productData = {
-      ...formData,
-      price: parseFloat(formData.price) || 0,
-      stock: parseInt(formData.stock) || 0, 
-      min_stock: parseInt(formData.min_stock) || 0,
-      sizes: formData.sizes.split(',').map(s => s.trim()).filter(s => s),
-      colors: formData.colors.split(',').map(c => c.trim()).filter(c => c),
+    const processedProductData = {
+      ...productData,
+      price: parseFloat(productData.price) || 0,
+      stock: parseInt(productData.stock) || 0, 
+      min_stock: parseInt(productData.min_stock) || 0,
+      sizes: productData.sizes ? productData.sizes.split(',').map(s => s.trim()).filter(s => s) : [],
+      colors: productData.colors ? productData.colors.split(',').map(c => c.trim()).filter(c => c) : [],
     };
 
-    if (!productData.name || !productData.barcode || !productData.price || isNaN(productData.stock)) {
+    console.log('📦 Dados processados:', processedProductData);
+
+    if (!processedProductData.name || !processedProductData.barcode || !processedProductData.price || isNaN(processedProductData.stock)) {
+      console.log('❌ Erro de validação:', { name: processedProductData.name, barcode: processedProductData.barcode, price: processedProductData.price, stock: processedProductData.stock });
       toast({ title: "Erro de Validação", description: "Nome, Código de Barras, Preço e Estoque Online são obrigatórios.", variant: "destructive" });
       return;
     }
 
     setLoading(true);
     try {
+      console.log('🏪 Verificando loja...');
       if (!editingProduct && !currentUser?.stores?.is_online_store) {
-         const onlineStore = stores.find(s => s.is_online_store); // Usando a variável de estado 'stores'
+         const onlineStore = stores.find(s => s.is_online_store);
+         console.log('🏪 Loja online encontrada:', onlineStore);
          if (onlineStore) {
-           productData.store_id = onlineStore.id; 
+           processedProductData.store_id = onlineStore.id; 
          } else {
+           console.log('❌ Loja online não encontrada');
            toast({ title: "Erro", description: "Loja online principal não encontrada para cadastro.", variant: "destructive"});
            setLoading(false);
            return;
          }
       } else if (editingProduct) {
-        productData.store_id = editingProduct.store_id; 
+        processedProductData.store_id = editingProduct.store_id; 
       } else if (currentUser?.stores?.is_online_store) {
-         productData.store_id = currentUser.store_id;
+         processedProductData.store_id = currentUser.store_id;
       }
 
+      console.log('📦 Dados finais antes de salvar:', processedProductData);
 
       if (editingProduct) {
-        await updateProduct(editingProduct.id, productData);
-        toast({ title: "Produto atualizado!", description: `${productData.name} foi atualizado.` });
+        console.log('✏️ Atualizando produto...');
+        await updateProduct(editingProduct.id, processedProductData);
+        toast({ title: "Produto atualizado!", description: `${processedProductData.name} foi atualizado.` });
       } else {
+        console.log('🔍 Verificando código de barras duplicado...');
         const allDbProducts = await getAllProducts(); 
-        if (allDbProducts.some(p => p.barcode === productData.barcode)) {
+        console.log('📋 Produtos existentes:', allDbProducts.length);
+        
+        if (allDbProducts.some(p => p.barcode === processedProductData.barcode)) {
+            console.log('❌ Código de barras já existe:', processedProductData.barcode);
             toast({ title: "Erro de Validação", description: "Código de barras já existe.", variant: "destructive" });
             setLoading(false);
             return;
         }
-        await addProduct(productData);
-        toast({ title: "Produto criado!", description: `${productData.name} foi criado.` });
+        
+        console.log('✅ Criando produto...');
+        const newProduct = await addProduct(processedProductData);
+        console.log('✅ Produto criado com sucesso:', newProduct);
+        toast({ title: "Produto criado!", description: `${processedProductData.name} foi criado.` });
       }
       fetchProductsAndStoresData();
       setShowFormDialog(false);
       resetForm();
     } catch (error) {
+      console.error('❌ Erro ao salvar produto:', error);
       toast({ title: "Erro ao salvar produto", description: error.message, variant: "destructive" });
     } finally {
       setLoading(false);

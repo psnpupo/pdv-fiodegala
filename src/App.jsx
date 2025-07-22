@@ -10,6 +10,7 @@ import Stock from '@/components/Stock';
 import Customers from '@/components/Customers';
 import Reports from '@/components/Reports';
 import Users from '@/components/Users';
+import CashRegister from '@/components/CashRegister';
 import { getCurrentUser, hasPermission, PERMISSIONS, authenticateUser, setCurrentUser as setLocalCurrentUser, logout as localLogout } from '@/lib/auth';
 import { supabase } from '@/lib/supabaseClient';
 import { useToast } from '@/components/ui/use-toast';
@@ -115,6 +116,7 @@ const App = () => {
           <Route path="customers" element={<ProtectedRoute user={user} element={<Customers />} requiredPermission={PERMISSIONS.MANAGE_PRODUCTS} />} />
           <Route path="reports" element={<ProtectedRoute user={user} element={<Reports />} requiredPermission={PERMISSIONS.VIEW_REPORTS} />} />
           <Route path="users" element={<ProtectedRoute user={user} element={<Users />} requiredPermission={PERMISSIONS.MANAGE_USERS} />} />
+          <Route path="cash-register" element={<ProtectedRoute user={user} element={<CashRegister />} requiredPermission={PERMISSIONS.CASH_REGISTER_MANAGEMENT} />} />
           <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />
         </Route>
       </Routes>

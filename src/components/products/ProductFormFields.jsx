@@ -18,7 +18,19 @@ const ProductFormFields = ({ formData, handleInputChange, handleProductTypeChang
         </div>
         <div>
           <Label htmlFor="category">Categoria</Label>
-          <Input id="category" name="category" value={formData.category} onChange={handleInputChange} />
+          <Select name="category" value={formData.category} onValueChange={(value) => handleInputChange({ target: { name: 'category', value } })}>
+            <SelectTrigger><SelectValue placeholder="Selecione a categoria" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Camiseta">Camiseta</SelectItem>
+              <SelectItem value="Gola Média">Gola Média</SelectItem>
+              <SelectItem value="Camisa">Camisa</SelectItem>
+              <SelectItem value="Blazer">Blazer</SelectItem>
+              <SelectItem value="Jaqueta">Jaqueta</SelectItem>
+              <SelectItem value="Súeter">Súeter</SelectItem>
+              <SelectItem value="Calças">Calças</SelectItem>
+              <SelectItem value="Bermudas">Bermudas</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <Label htmlFor="barcode">Código de Barras Principal *</Label>
@@ -37,7 +49,7 @@ const ProductFormFields = ({ formData, handleInputChange, handleProductTypeChang
           <Input id="price_atacado" name="price_atacado" type="number" step="0.01" value={formData.price_atacado || ''} onChange={handleInputChange} />
         </div>
         <div>
-          <Label htmlFor="price_atacarejo">Preço de Atacarejo</Label>
+          <Label htmlFor="price_atacarejo">Cliente Exclusivo</Label>
           <Input id="price_atacarejo" name="price_atacarejo" type="number" step="0.01" value={formData.price_atacarejo || ''} onChange={handleInputChange} />
         </div>
         <div>

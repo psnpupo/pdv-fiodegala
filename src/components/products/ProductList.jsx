@@ -51,10 +51,21 @@ const ProductList = ({ products, onEdit, onDelete, stores, currentUser }) => {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-2">
                     {product.image_url ? (
-                      <img  src={product.image_url} alt={product.name} className="w-10 h-10 object-cover rounded-md border" src="https://images.unsplash.com/photo-1627577741153-74b82d87607b" />
-                    ) : (
-                      <Package className="w-5 h-5 text-primary" />
-                    )}
+                      <img 
+                        src={product.image_url} 
+                        alt={product.name} 
+                        className="w-10 h-10 object-cover rounded-md border"
+                        onError={(e) => {
+                          console.log('❌ Erro ao carregar imagem:', product.image_url, 'para produto:', product.name);
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'block';
+                        }}
+                        onLoad={() => {
+                          console.log('✅ Imagem carregada com sucesso:', product.image_url, 'para produto:', product.name);
+                        }}
+                      />
+                    ) : null}
+                    <Package className={`w-5 h-5 text-primary ${product.image_url ? 'hidden' : 'block'}`} />
                     <CardTitle className="text-lg">{product.name}</CardTitle>
                   </div>
                   <div className="flex space-x-1">

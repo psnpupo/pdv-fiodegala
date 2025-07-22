@@ -32,6 +32,8 @@ export const getProducts = async (includeVariations = false) => {
 };
 
 export const getAllProducts = async (includeVariations = false) => {
+  console.log('🔍 getAllProducts iniciado, includeVariations:', includeVariations);
+  
   let query = supabase
     .from('products')
     .select('*, stores(name, is_online_store)')
@@ -40,9 +42,11 @@ export const getAllProducts = async (includeVariations = false) => {
   const { data, error } = await query;
 
   if (error) {
-    console.error('Error fetching all products:', error);
+    console.error('❌ Erro ao buscar todos os produtos:', error);
     return [];
   }
+
+  console.log('📋 Produtos encontrados:', data?.length || 0);
   
   if (includeVariations && data) {
     for (let product of data) {
@@ -51,29 +55,42 @@ export const getAllProducts = async (includeVariations = false) => {
           .from('product_variations')
           .select('*')
           .eq('product_id', product.id);
-        if (varError) console.error(`Error fetching variations for product ${product.id}:`, varError);
+        if (varError) console.error(`❌ Erro ao buscar variações do produto ${product.id}:`, varError);
         product.variations = variations || [];
       }
     }
   }
+  
+  console.log('✅ getAllProducts concluído');
   return data;
 };
 
 export const addProduct = async (productData) => {
+  console.log('🔄 addProduct iniciado com dados:', productData);
+  
   const user = getCurrentUser();
+  console.log('👤 Usuário atual:', user);
+  
   const { variations, ...mainProductData } = productData;
   let dataToInsert = { ...mainProductData };
 
+  console.log('📦 Dados principais para inserção:', dataToInsert);
+
   if (!dataToInsert.store_id) {
+    console.log('🏪 Buscando loja online...');
     const onlineStores = await getAllStoresAuth();
+    console.log('🏪 Lojas disponíveis:', onlineStores);
     const onlineStore = onlineStores.find(s => s.is_online_store);
     if (onlineStore) {
       dataToInsert.store_id = onlineStore.id;
+      console.log('✅ Loja online associada:', onlineStore.id);
     } else {
-      console.error("Loja online principal não encontrada para associar o produto.");
+      console.error("❌ Loja online principal não encontrada para associar o produto.");
+      throw new Error("Loja online principal não encontrada.");
     }
   }
   
+  console.log('📝 Inserindo produto no Supabase...');
   const { data: newProduct, error: productError } = await supabase
     .from('products')
     .insert([dataToInsert])
@@ -81,22 +98,30 @@ export const addProduct = async (productData) => {
     .single();
 
   if (productError) {
-    console.error('Error adding product:', productError);
+    console.error('❌ Erro ao inserir produto:', productError);
     throw productError;
   }
 
+  console.log('✅ Produto inserido com sucesso:', newProduct);
+
   if (newProduct && newProduct.product_type === 'variable' && variations && variations.length > 0) {
+    console.log('🔄 Inserindo variações...');
     const variationsToInsert = variations.map(v => ({
       ...v,
       product_id: newProduct.id,
     }));
+    console.log('📦 Variações para inserir:', variationsToInsert);
+    
     const { error: variationsError } = await supabase.from('product_variations').insert(variationsToInsert);
     if (variationsError) {
-      console.error('Error adding product variations:', variationsError);
+      console.error('❌ Erro ao inserir variações:', variationsError);
       await supabase.from('products').delete().eq('id', newProduct.id); // Rollback product
       throw variationsError;
     }
+    console.log('✅ Variações inseridas com sucesso');
   }
+  
+  console.log('🎉 Produto criado completamente:', newProduct);
   return newProduct;
 };
 

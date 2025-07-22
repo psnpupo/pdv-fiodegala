@@ -16,6 +16,8 @@ const ProductDetail = () => {
   const [allStores, setAllStores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [images, setImages] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [showImageModal, setShowImageModal] = useState(false);
   const { toast } = useToast();
 
   const fetchProductDetails = useCallback(async () => {
@@ -30,13 +32,17 @@ const ProductDetail = () => {
       if (productError) throw productError;
       setProduct(productData);
 
-      // Buscar imagens do produto
-      const { data: imagesData } = await supabase
-        .from('product_images')
-        .select('*')
-        .eq('product_id', productId)
-        .order('is_featured', { ascending: false });
-      setImages(imagesData || []);
+      // Buscar imagens do produto - usar image_url do próprio produto
+      const productImages = [];
+      if (productData.image_url) {
+        productImages.push({
+          id: 'main',
+          image_url: productData.image_url,
+          is_featured: true
+        });
+      }
+      setImages(productImages);
+      console.log('🖼️ Imagens encontradas:', productImages);
 
       if (productData.product_type === 'variable') {
         const { data: variationsData, error: variationsError } = await supabase
@@ -45,6 +51,7 @@ const ProductDetail = () => {
           .eq('product_id', productId);
         if (variationsError) throw variationsError;
         setVariations(variationsData || []);
+        console.log('🔄 Variações encontradas:', variationsData);
       }
       const pssData = await getProductStoreStock(productId);
       setPhysicalStocks(pssData || []);
@@ -63,6 +70,16 @@ const ProductDetail = () => {
   }, [fetchProductDetails]);
 
   const getStoreName = (storeId) => allStores.find(s => s.id === storeId)?.name || 'Loja Desconhecida';
+
+  const openImageModal = (image) => {
+    setSelectedImage(image);
+    setShowImageModal(true);
+  };
+
+  const closeImageModal = () => {
+    setShowImageModal(false);
+    setSelectedImage(null);
+  };
 
   if (loading) {
     return <div className="flex justify-center items-center h-screen"><div className="loading-spinner"></div></div>;
@@ -105,10 +122,40 @@ const ProductDetail = () => {
             <CardContent>
               {images.length > 0 ? (
                 <div>
-                  <img src={images[0].image_url} alt="Destaque" className="w-full h-64 object-cover rounded-lg border mb-2" />
+                  <img 
+                    src={images[0].image_url} 
+                    alt="Destaque" 
+                    className="w-full h-64 object-cover rounded-lg border mb-2 cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => openImageModal(images[0])}
+                    onError={(e) => {
+                      console.log('❌ Erro ao carregar imagem principal:', images[0].image_url);
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                    onLoad={() => {
+                      console.log('✅ Imagem principal carregada:', images[0].image_url);
+                    }}
+                  />
+                  <div className="w-full h-64 bg-muted rounded-lg flex items-center justify-center hidden">
+                    <ImageIcon className="w-16 h-16 text-muted-foreground" />
+                  </div>
                   <div className="flex gap-2 flex-wrap mt-2">
                     {images.map((img, idx) => (
-                      <img key={img.id} src={img.image_url} alt={`Imagem ${idx+1}`} className={`w-16 h-16 object-cover rounded border ${idx===0 ? 'ring-2 ring-primary' : ''}`} title={img.is_featured ? 'Destaque' : ''} />
+                      <img 
+                        key={img.id} 
+                        src={img.image_url} 
+                        alt={`Imagem ${idx+1}`} 
+                        className={`w-16 h-16 object-cover rounded border cursor-pointer hover:opacity-90 transition-opacity ${idx===0 ? 'ring-2 ring-primary' : ''}`} 
+                        title={img.is_featured ? 'Destaque' : ''}
+                        onClick={() => openImageModal(img)}
+                        onError={(e) => {
+                          console.log('❌ Erro ao carregar miniatura:', img.image_url);
+                          e.target.style.display = 'none';
+                        }}
+                        onLoad={() => {
+                          console.log('✅ Miniatura carregada:', img.image_url);
+                        }}
+                      />
                     ))}
                   </div>
                 </div>
@@ -201,10 +248,24 @@ const ProductDetail = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
                       <div className="md:col-span-1">
                         {variation.image_url ? (
-                           <img  src={variation.image_url} alt={`Variação ${index + 1}`} className="w-full h-auto object-cover rounded border aspect-square" />
-                        ) : (
-                          <div className="w-full h-32 bg-muted rounded flex items-center justify-center"><ImageIcon className="w-10 h-10 text-muted-foreground" /></div>
-                        )}
+                           <img 
+                             src={variation.image_url} 
+                             alt={`Variação ${index + 1}`} 
+                             className="w-full h-auto object-cover rounded border aspect-square cursor-pointer hover:opacity-90 transition-opacity"
+                             onClick={() => openImageModal({ image_url: variation.image_url, id: variation.id })}
+                             onError={(e) => {
+                               console.log('❌ Erro ao carregar imagem da variação:', variation.image_url);
+                               e.target.style.display = 'none';
+                               e.target.nextSibling.style.display = 'flex';
+                             }}
+                             onLoad={() => {
+                               console.log('✅ Imagem da variação carregada:', variation.image_url);
+                             }}
+                           />
+                        ) : null}
+                        <div className="w-full h-32 bg-muted rounded flex items-center justify-center" style={{ display: variation.image_url ? 'none' : 'flex' }}>
+                          <ImageIcon className="w-10 h-10 text-muted-foreground" />
+                        </div>
                       </div>
                       <div className="md:col-span-2 space-y-2 text-sm">
                         <p className="font-semibold text-base">
@@ -240,6 +301,31 @@ const ProductDetail = () => {
           )}
         </div>
       </div>
+
+      {/* Modal de Visualização de Imagem */}
+      {showImageModal && selectedImage && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+          onClick={closeImageModal}
+        >
+          <div className="relative max-w-4xl max-h-full">
+            <button
+              onClick={closeImageModal}
+              className="absolute top-4 right-4 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-full p-2 transition-all z-10"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <img
+              src={selectedImage.image_url}
+              alt="Visualização"
+              className="max-w-full max-h-full object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -29,7 +29,7 @@ const ProductForm = ({ open, onOpenChange, formData, setFormData, onSubmit, edit
   const [productImagePreviews, setProductImagePreviews] = useState([]); // urls
   const [showMedidasModal, setShowMedidasModal] = useState(false);
   const [medidas, setMedidas] = useState(formData.medidas || {
-    ombro: '', busto: '', cintura: '', quadril: '', comprimento: '', manga: ''
+    ombro: '', busto: '', cintura: '', quadril: '', comprimento: '', manga: '', tornozelo: ''
   });
 
   const mainImageInputRef = useRef(null);
@@ -83,8 +83,34 @@ const ProductForm = ({ open, onOpenChange, formData, setFormData, onSubmit, edit
   }, [editingProduct, open, setFormData]);
 
   useEffect(() => {
-    setMedidas(formData.medidas || { ombro: '', busto: '', cintura: '', quadril: '', comprimento: '', manga: '' });
+    setMedidas(formData.medidas || { ombro: '', busto: '', cintura: '', quadril: '', comprimento: '', manga: '', tornozelo: '' });
   }, [formData.medidas]);
+
+  // Função para determinar quais campos de medida mostrar baseado na categoria
+  const getMedidasFields = () => {
+    const categoria = formData.category;
+    const categoriasRoupa = ['Camiseta', 'Gola Média', 'Camisa', 'Blazer', 'Jaqueta', 'Súeter'];
+    const categoriasCalca = ['Calças', 'Bermudas'];
+    
+    if (categoriasRoupa.includes(categoria)) {
+      return [
+        { name: 'tamanho', label: 'Tamanho' },
+        { name: 'comprimento', label: 'Comprimento' },
+        { name: 'busto', label: 'Busto' },
+        { name: 'cintura', label: 'Cintura' },
+        { name: 'ombro', label: 'Ombro' },
+        { name: 'manga', label: 'Manga' }
+      ];
+    } else if (categoriasCalca.includes(categoria)) {
+      return [
+        { name: 'tamanho', label: 'Tamanho' },
+        { name: 'comprimento', label: 'Comprimento' },
+        { name: 'cintura', label: 'Cintura' },
+        { name: 'tornozelo', label: 'Tornozelo' }
+      ];
+    }
+    return []; // Retorna array vazio se não for uma categoria específica
+  };
 
   useEffect(() => {
     const fetchPhysicalStores = async () => {
@@ -195,9 +221,14 @@ const ProductForm = ({ open, onOpenChange, formData, setFormData, onSubmit, edit
     return publicUrl;
   };
 
-  // 3. No internalHandleSubmit, fazer upload de todas as imagens e salvar na tabela product_images
-  const internalHandleSubmit = async (e) => {
+  // Função para submit do formulário HTML
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
+    await internalHandleSubmit();
+  };
+
+  // internalHandleSubmit agora não recebe mais o evento
+  const internalHandleSubmit = async () => {
     // ... upload da imagem principal (mantém para compatibilidade)
     let mainImageUrl = formData.image_url;
     if (mainImageFile) {
@@ -234,7 +265,6 @@ const ProductForm = ({ open, onOpenChange, formData, setFormData, onSubmit, edit
     });
 
     if (!processedVariations && variations.length > 0) return;
-
 
     const payload = {
       ...formData,
@@ -300,7 +330,7 @@ const ProductForm = ({ open, onOpenChange, formData, setFormData, onSubmit, edit
       </DialogTrigger>
       <DialogContent className="max-w-4xl">
         <DialogHeader><DialogTitle>{editingProduct ? 'Editar Produto' : 'Novo Produto'}</DialogTitle></DialogHeader>
-        <form onSubmit={internalHandleSubmit} className="space-y-6 max-h-[80vh] overflow-y-auto p-2">
+        <form onSubmit={handleFormSubmit} className="space-y-6 max-h-[80vh] overflow-y-auto p-2">
           <ProductFormFields 
             formData={formData}
             handleInputChange={handleInputChange}
@@ -403,14 +433,24 @@ const ProductForm = ({ open, onOpenChange, formData, setFormData, onSubmit, edit
             <DialogHeader>
               <DialogTitle>Medidas da Peça</DialogTitle>
             </DialogHeader>
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              <div><Label>Ombro</Label><Input name="ombro" value={medidas.ombro} onChange={handleMedidasChange} /></div>
-              <div><Label>Busto</Label><Input name="busto" value={medidas.busto} onChange={handleMedidasChange} /></div>
-              <div><Label>Cintura</Label><Input name="cintura" value={medidas.cintura} onChange={handleMedidasChange} /></div>
-              <div><Label>Quadril</Label><Input name="quadril" value={medidas.quadril} onChange={handleMedidasChange} /></div>
-              <div><Label>Comprimento</Label><Input name="comprimento" value={medidas.comprimento} onChange={handleMedidasChange} /></div>
-              <div><Label>Manga</Label><Input name="manga" value={medidas.manga} onChange={handleMedidasChange} /></div>
-            </div>
+            {formData.category ? (
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                {getMedidasFields().map((field) => (
+                  <div key={field.name}>
+                    <Label>{field.label}</Label>
+                    <Input 
+                      name={field.name} 
+                      value={medidas[field.name] || ''} 
+                      onChange={handleMedidasChange} 
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                Selecione uma categoria primeiro para ver os campos de medidas disponíveis.
+              </div>
+            )}
             <div className="flex justify-end gap-2 mt-6">
               <Button type="button" variant="ghost" onClick={() => setShowMedidasModal(false)}>Cancelar</Button>
               <Button type="button" onClick={salvarMedidas}>Salvar</Button>
