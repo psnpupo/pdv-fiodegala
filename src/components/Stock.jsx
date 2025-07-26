@@ -26,7 +26,8 @@ const MOVEMENT_TYPES = {
   SALE_ONLINE: 'sale_online_physical_debit', 
   SALE_PHYSICAL: 'sale_physical_store', 
   TRANSFER_IN: 'transfer_in', 
-  TRANSFER_OUT: 'transfer_out' 
+  TRANSFER_OUT: 'transfer_out',
+  TRANSFER_TO_STORE: 'transfer_to_store' // Novo tipo para transferência para loja específica
 };
 
 const MOVEMENT_LABELS = {
@@ -37,6 +38,7 @@ const MOVEMENT_LABELS = {
   [MOVEMENT_TYPES.SALE_PHYSICAL]: 'Venda Loja Física',
   [MOVEMENT_TYPES.TRANSFER_IN]: 'Transferência (Entrada Loja)',
   [MOVEMENT_TYPES.TRANSFER_OUT]: 'Transferência (Saída Online)',
+  [MOVEMENT_TYPES.TRANSFER_TO_STORE]: 'Transferência para Loja'
 };
 
 const Stock = () => {
@@ -175,14 +177,137 @@ const Stock = () => {
         let stockType = 'online'; 
         let productStoreStockIdForMovement = null;
 
+        // Lógica para transferência entre lojas
+        if (movementForm.type === MOVEMENT_TYPES.TRANSFER_TO_STORE) {
+            if (!movementForm.target_store_id) {
+                toast({ title: "Erro", description: "Selecione uma loja de destino para a transferência.", variant: "destructive" });
+                setLoading(false);
+                return;
+            }
+
+            // Verificar se há estoque suficiente no online
+            if (selectedProduct.stock < quantity) {
+                toast({ title: "Erro", description: "Estoque online insuficiente para esta transferência.", variant: "destructive" });
+                setLoading(false);
+                return;
+            }
+
+            // Diminuir do estoque online
+            const newOnlineStock = selectedProduct.stock - quantity;
+            await updateProduct(selectedProduct.id, { stock: newOnlineStock });
+
+            // Aumentar na loja de destino
+            const targetStoreStock = selectedProduct.physicalStocks.find(ps => ps.store_id === movementForm.target_store_id);
+            let newTargetStoreStock;
+            
+            if (targetStoreStock) {
+                newTargetStoreStock = targetStoreStock.quantity + quantity;
+                await supabase.from('product_store_stock').update({ quantity: newTargetStoreStock }).eq('id', targetStoreStock.id);
+                productStoreStockIdForMovement = targetStoreStock.id;
+            } else {
+                newTargetStoreStock = quantity;
+                const {data: newPssEntry} = await supabase.from('product_store_stock').insert({ 
+                    product_id: selectedProduct.id, 
+                    store_id: movementForm.target_store_id, 
+                    quantity: newTargetStoreStock 
+                }).select("id").single();
+                productStoreStockIdForMovement = newPssEntry?.id;
+            }
+
+            // Registrar a movimentação de transferência
+            await addStockMovement({
+                product_id: selectedProduct.id,
+                type: MOVEMENT_TYPES.TRANSFER_TO_STORE,
+                quantity: quantity,
+                previous_stock: selectedProduct.stock,
+                new_stock: newOnlineStock,
+                reason: `Transferência para ${getStoreNameById(movementForm.target_store_id)} - ${movementForm.reason}`,
+                user_id: user?.id,
+                store_id: movementForm.target_store_id,
+                stock_type: 'physical_store',
+                product_store_stock_id: productStoreStockIdForMovement
+            });
+
+            toast({ 
+                title: "Transferência realizada!", 
+                description: `${quantity} unidades transferidas para ${getStoreNameById(movementForm.target_store_id)}.` 
+            });
+            fetchData();
+            setShowMovementDialog(false);
+            setMovementForm({ type: '', quantity: '', reason: '', target_store_id: '' });
+            setSelectedProduct(null);
+            setSelectedStoreForMovement(null);
+            setLoading(false);
+            return;
+        }
+
+        // Lógica existente para outros tipos de movimentação
         if (movementForm.target_store_id) { 
+            // Se tem loja de destino selecionada, tratar como transferência
+            if (movementForm.type === MOVEMENT_TYPES.OUT) {
+                // Verificar se há estoque suficiente no online
+                if (selectedProduct.stock < quantity) {
+                    toast({ title: "Erro", description: "Estoque online insuficiente para esta transferência.", variant: "destructive" });
+                    setLoading(false);
+                    return;
+                }
+
+                // Diminuir do estoque online
+                const newOnlineStock = selectedProduct.stock - quantity;
+                await updateProduct(selectedProduct.id, { stock: newOnlineStock });
+
+                // Aumentar na loja de destino
+                const targetStoreStock = selectedProduct.physicalStocks.find(ps => ps.store_id === movementForm.target_store_id);
+                let newTargetStoreStock;
+                
+                if (targetStoreStock) {
+                    newTargetStoreStock = targetStoreStock.quantity + quantity;
+                    await supabase.from('product_store_stock').update({ quantity: newTargetStoreStock }).eq('id', targetStoreStock.id);
+                    productStoreStockIdForMovement = targetStoreStock.id;
+                } else {
+                    newTargetStoreStock = quantity;
+                    const {data: newPssEntry} = await supabase.from('product_store_stock').insert({ 
+                        product_id: selectedProduct.id, 
+                        store_id: movementForm.target_store_id, 
+                        quantity: newTargetStoreStock 
+                    }).select("id").single();
+                    productStoreStockIdForMovement = newPssEntry?.id;
+                }
+
+                // Registrar a movimentação como transferência
+                await addStockMovement({
+                    product_id: selectedProduct.id,
+                    type: MOVEMENT_TYPES.TRANSFER_TO_STORE,
+                    quantity: quantity,
+                    previous_stock: selectedProduct.stock,
+                    new_stock: newOnlineStock,
+                    reason: `Transferência para ${getStoreNameById(movementForm.target_store_id)} - ${movementForm.reason}`,
+                    user_id: user?.id,
+                    store_id: movementForm.target_store_id,
+                    stock_type: 'physical_store',
+                    product_store_stock_id: productStoreStockIdForMovement
+                });
+
+                toast({ 
+                    title: "Transferência realizada!", 
+                    description: `${quantity} unidades transferidas para ${getStoreNameById(movementForm.target_store_id)}.` 
+                });
+                fetchData();
+                setShowMovementDialog(false);
+                setMovementForm({ type: '', quantity: '', reason: '', target_store_id: '' });
+                setSelectedProduct(null);
+                setSelectedStoreForMovement(null);
+                setLoading(false);
+                return;
+            }
+
+            // Para outros tipos (IN, ADJUSTMENT) com loja física
             stockType = 'physical_store';
             const physicalStock = selectedProduct.physicalStocks.find(ps => ps.store_id === movementForm.target_store_id);
             previousStockValue = physicalStock ? physicalStock.quantity : 0;
             productStoreStockIdForMovement = physicalStock ? physicalStock.id : null;
 
             if (movementForm.type === MOVEMENT_TYPES.IN) newStockValue = previousStockValue + quantity;
-            else if (movementForm.type === MOVEMENT_TYPES.OUT) newStockValue = previousStockValue - quantity;
             else if (movementForm.type === MOVEMENT_TYPES.ADJUSTMENT) newStockValue = quantity;
             
             if (newStockValue < 0 && movementForm.type !== MOVEMENT_TYPES.ADJUSTMENT) {
@@ -200,6 +325,7 @@ const Stock = () => {
             await recalculateOnlineStock(selectedProduct.id); 
 
         } else { 
+            // Movimentação no estoque online/geral
             if (!user?.stores?.is_online_store && user?.role !== USER_ROLES.ADMIN) {
                  toast({ title: "Ação não permitida", description: "Selecione uma loja física para esta movimentação ou realize no estoque Online (se admin/online).", variant: "destructive" });
                  setLoading(false); return;
@@ -232,7 +358,7 @@ const Stock = () => {
         product_store_stock_id: stockType === 'physical_store' ? productStoreStockIdForMovement : null
       });
 
-      toast({ title: "Movimentação registrada!", description: `${MOVEMENT_LABELS[movementForm.type]} de ${quantity} unidades para ${selectedProduct.name}.` });
+      toast({ title: "Movimentação registrada!", description: `${MOVEMENT_LABELS[movementForm.type] || movementForm.type} de ${quantity} unidades para ${selectedProduct.name}.` });
       fetchData();
       setShowMovementDialog(false);
       setMovementForm({ type: '', quantity: '', reason: '', target_store_id: '' });
@@ -470,9 +596,38 @@ const Stock = () => {
                   <Input value={selectedProduct.name} disabled />
                 </div>
                 
+                {/* Select de loja de destino para transferências */}
+                {(movementForm.type === MOVEMENT_TYPES.TRANSFER_TO_STORE || 
+                  (movementForm.type === MOVEMENT_TYPES.OUT && (user?.stores?.is_online_store || user?.role === USER_ROLES.ADMIN))) && (
+                  <div>
+                    <Label htmlFor="target_store_id">Loja de Destino</Label>
+                    <Select 
+                      value={movementForm.target_store_id} 
+                      onValueChange={(value) => setMovementForm({...movementForm, target_store_id: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a loja de destino" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {physicalStoresForSelect.map(store => (
+                          <SelectItem key={store.id} value={store.id}>
+                            {store.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {movementForm.type === MOVEMENT_TYPES.TRANSFER_TO_STORE 
+                        ? "Transferir estoque do online para esta loja"
+                        : "Movimentar estoque nesta loja específica"
+                      }
+                    </p>
+                  </div>
+                )}
+                
                 <div>
                   <Label>Estoque Atual</Label>
-                  <Input value={`${selectedProduct.stock} unidades`} disabled />
+                  <Input value={`${selectedProduct.stock} unidades (Online)`} disabled />
                 </div>
                 
                 <div>
