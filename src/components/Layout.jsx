@@ -3,7 +3,7 @@ import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { getCurrentUser, logout, hasPermission, PERMISSIONS } from '@/lib/auth';
-import { ShoppingCart, Package, Users as UsersIcon, BarChart3, Settings, LogOut, Menu, X, CreditCard, Warehouse, Store, DollarSign } from 'lucide-react';
+import { ShoppingCart, Package, Users as UsersIcon, BarChart3, Settings, LogOut, Menu, X, CreditCard, Warehouse, Store, DollarSign, Tag } from 'lucide-react';
 
 const Layout = ({ onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -25,6 +25,13 @@ const Layout = ({ onLogout }) => {
       icon: Package,
       path: '/products',
       permission: PERMISSIONS.MANAGE_PRODUCTS
+    },
+    {
+      id: 'categories',
+      label: 'Categorias',
+      icon: Tag,
+      path: '/categories',
+      permission: PERMISSIONS.MANAGE_CATEGORIES
     },
     {
       id: 'stock',

@@ -7,6 +7,7 @@ import { Plus, Share2, CornerDownRight } from 'lucide-react';
 import { getStores, hasPermission, PERMISSIONS, getCurrentUser } from '@/lib/auth';
 import { useToast } from '@/components/ui/use-toast';
 import { shareProductStockWithStore, getProductStoreStock } from '@/lib/productsStorage';
+import { getActiveCategories } from '@/lib/categoriesStorage';
 import { supabase } from '@/lib/supabaseClient';
 import ProductFormFields, { PRODUCT_TYPES } from './ProductFormFields';
 import ProductVariationsForm from './ProductVariationsForm';
@@ -15,6 +16,7 @@ import { Input } from '@/components/ui/input';
 
 const ProductForm = ({ open, onOpenChange, formData, setFormData, onSubmit, editingProduct, resetForm, onStockShared }) => {
   const [physicalStores, setPhysicalStores] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [showShareStock, setShowShareStock] = useState(false);
   const [shareStoreId, setShareStoreId] = useState('');
   const [shareQuantity, setShareQuantity] = useState('');
@@ -118,6 +120,18 @@ const ProductForm = ({ open, onOpenChange, formData, setFormData, onSubmit, edit
       setPhysicalStores(allStores || []);
     };
     fetchPhysicalStores();
+  }, []);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const categoriesData = await getActiveCategories();
+        setCategories(categoriesData || []);
+      } catch (error) {
+        console.error('Erro ao buscar categorias:', error);
+      }
+    };
+    fetchCategories();
   }, []);
 
   useEffect(() => {
@@ -331,10 +345,11 @@ const ProductForm = ({ open, onOpenChange, formData, setFormData, onSubmit, edit
       <DialogContent className="max-w-4xl">
         <DialogHeader><DialogTitle>{editingProduct ? 'Editar Produto' : 'Novo Produto'}</DialogTitle></DialogHeader>
         <form onSubmit={handleFormSubmit} className="space-y-6 max-h-[80vh] overflow-y-auto p-2">
-          <ProductFormFields 
+                    <ProductFormFields
             formData={formData}
             handleInputChange={handleInputChange}
             handleProductTypeChange={handleProductTypeChange}
+            categories={categories}
           />
           <ProductImageUpload
             title="Imagem Principal (opcional)"

@@ -8,7 +8,7 @@ export const PRODUCT_TYPES = {
   VARIABLE: 'variable',
 };
 
-const ProductFormFields = ({ formData, handleInputChange, handleProductTypeChange }) => {
+const ProductFormFields = ({ formData, handleInputChange, handleProductTypeChange, categories = [] }) => {
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -21,14 +21,11 @@ const ProductFormFields = ({ formData, handleInputChange, handleProductTypeChang
           <Select name="category" value={formData.category} onValueChange={(value) => handleInputChange({ target: { name: 'category', value } })}>
             <SelectTrigger><SelectValue placeholder="Selecione a categoria" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="Camiseta">Camiseta</SelectItem>
-              <SelectItem value="Gola Média">Gola Média</SelectItem>
-              <SelectItem value="Camisa">Camisa</SelectItem>
-              <SelectItem value="Blazer">Blazer</SelectItem>
-              <SelectItem value="Jaqueta">Jaqueta</SelectItem>
-              <SelectItem value="Súeter">Súeter</SelectItem>
-              <SelectItem value="Calças">Calças</SelectItem>
-              <SelectItem value="Bermudas">Bermudas</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category.id} value={category.name}>
+                  {category.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

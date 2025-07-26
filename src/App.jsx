@@ -7,6 +7,7 @@ import POS from '@/components/POS';
 import Products from '@/components/Products';
 import ProductDetail from '@/components/products/ProductDetail';
 import Stock from '@/components/Stock';
+import Categories from '@/components/Categories';
 import Customers from '@/components/Customers';
 import Reports from '@/components/Reports';
 import Users from '@/components/Users';
@@ -112,6 +113,7 @@ const App = () => {
           <Route path="pos" element={<ProtectedRoute user={user} element={<POS />} requiredPermission={PERMISSIONS.PROCESS_SALES} />} />
           <Route path="products" element={<ProtectedRoute user={user} element={<Products />} requiredPermission={PERMISSIONS.MANAGE_PRODUCTS} />} />
           <Route path="products/:id" element={<ProtectedRoute user={user} element={<ProductDetail />} requiredPermission={PERMISSIONS.MANAGE_PRODUCTS} />} />
+          <Route path="categories" element={<ProtectedRoute user={user} element={<Categories />} requiredPermission={PERMISSIONS.MANAGE_CATEGORIES} />} />
           <Route path="stock" element={<ProtectedRoute user={user} element={<Stock />} requiredPermission={PERMISSIONS.MANAGE_STOCK} />} />
           <Route path="customers" element={<ProtectedRoute user={user} element={<Customers />} requiredPermission={PERMISSIONS.MANAGE_PRODUCTS} />} />
           <Route path="reports" element={<ProtectedRoute user={user} element={<Reports />} requiredPermission={PERMISSIONS.VIEW_REPORTS} />} />
