@@ -14,7 +14,7 @@ import Users from '@/components/Users';
 import CashRegister from '@/components/CashRegister';
 import PeripheralSettings from '@/components/settings/PeripheralSettings';
 import FiscalDocuments from '@/components/fiscal/FiscalDocuments';
-import SetupWizard from '@/components/setup/SetupWizard';
+
 import { getCurrentUser, hasPermission, PERMISSIONS, authenticateUser, setCurrentUser as setLocalCurrentUser, logout as localLogout } from '@/lib/auth';
 import { supabase } from '@/lib/supabaseClient';
 import { useToast } from '@/components/ui/use-toast';
@@ -33,7 +33,7 @@ const ProtectedRoute = ({ element, requiredPermission, user }) => {
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showSetupWizard, setShowSetupWizard] = useState(false);
+
   const { toast } = useToast();
 
   useEffect(() => {
@@ -91,18 +91,7 @@ function App() {
         const currentUser = await getCurrentUser();
         setUser(currentUser);
         
-        // Verificar se é primeiro acesso (sem configurações)
-        if (currentUser) {
-          try {
-            const config = await fetch('/api/peripherals/config').then(r => r.json());
-            if (!config.success) {
-              setShowSetupWizard(true);
-            }
-          } catch (error) {
-            // Se não conseguir acessar configurações, mostrar wizard
-            setShowSetupWizard(true);
-          }
-        }
+
       } catch (error) {
         console.error('Erro ao verificar usuário:', error);
       } finally {
@@ -131,13 +120,7 @@ function App() {
     );
   }
 
-  if (showSetupWizard) {
-    return (
-      <SetupWizard 
-        onComplete={() => setShowSetupWizard(false)} 
-      />
-    );
-  }
+
 
   return (
     <Router>

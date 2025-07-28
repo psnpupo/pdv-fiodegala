@@ -5,7 +5,6 @@ Esta pasta contém toda a documentação do sistema PDV Fio de Gala.
 ## 📋 Índice da Documentação
 
 ### 🚀 **Instalação e Configuração**
-- **[INSTALACAO-SIMPLES.md](INSTALACAO-SIMPLES.md)** - Guia de instalação super simples
 - **[GUIA-INSTALACAO.md](GUIA-INSTALACAO.md)** - Instalação detalhada e completa
 
 ### 📖 **Guias do Sistema**
@@ -17,7 +16,7 @@ Esta pasta contém toda a documentação do sistema PDV Fio de Gala.
 ## 🎯 **Por onde começar?**
 
 ### **Para clientes novos:**
-1. **[INSTALACAO-SIMPLES.md](INSTALACAO-SIMPLES.md)** - Instalação em 3 passos
+1. **[GUIA-INSTALACAO.md](GUIA-INSTALACAO.md)** - Instalação passo a passo
 2. **[GUIA-COMPLETO-SISTEMA.md](GUIA-COMPLETO-SISTEMA.md)** - Conhecer o sistema
 
 ### **Para configuração de periféricos:**

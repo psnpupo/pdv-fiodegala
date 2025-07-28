@@ -7,49 +7,48 @@
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-orange.svg)](https://supabase.com/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-## 🚀 **Instalação Super Simples**
+## 🚀 **Instalação**
 
-### **⚡ Instalação Automática (Recomendado)**
-
-#### **Windows:**
-```powershell
-# Opção 1: PowerShell (Recomendado)
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/psnpupo/pdv-fiodegala/main/setup-pdv.ps1" -OutFile "setup-pdv.ps1"
-.\setup-pdv.ps1
-
-# Opção 2: Batch
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/psnpupo/pdv-fiodegala/main/setup-pdv.bat" -OutFile "setup-pdv.bat"
-.\setup-pdv.bat
-```
-
-#### **Linux/macOS:**
-```bash
-# Baixar e executar em uma linha
-curl -sSL https://raw.githubusercontent.com/psnpupo/pdv-fiodegala/main/setup-pdv.sh | bash
-```
-
-### **🔧 Instalação Manual**
-
-#### **1. Baixar o projeto:**
+### **1. Baixar o projeto:**
 ```bash
 git clone https://github.com/psnpupo/pdv-fiodegala.git
 cd pdv-fiodegala
 ```
 
-#### **2. Executar Setup Wizard:**
+### **2. Instalar dependências:**
 ```bash
-node setup-wizard.js
+# Frontend
+npm install
+
+# Backend
+cd backend && npm install && cd ..
 ```
 
-#### **3. Seguir as instruções do Setup Wizard:**
-- ✅ Instalar dependências
-- ✅ Configurar Supabase Cloud
-- ✅ Executar scripts SQL
-- ✅ Testar conexão
-- ✅ Criar scripts de inicialização
+### **3. Configurar ambiente:**
+```bash
+# Copiar arquivo de exemplo
+cp backend/env.example backend/.env
+
+# Editar com suas credenciais do Supabase
+# backend/.env
+```
+
+### **4. Configurar banco de dados:**
+- Acesse: https://supabase.com
+- Crie um projeto
+- Execute os scripts SQL em `tools/`
+- Configure as credenciais no `backend/.env`
+
+### **5. Iniciar o sistema:**
+```bash
+# Terminal 1 - Backend
+cd backend && npm start
+
+# Terminal 2 - Frontend
+npm run dev
+```
 
 ### **Guias Detalhados**
-- **Instalação Simples:** `docs/INSTALACAO-SIMPLES.md`
 - **Guia Completo:** `docs/GUIA-COMPLETO-SISTEMA.md`
 - **Instalação Detalhada:** `docs/GUIA-INSTALACAO.md`
 
@@ -67,7 +66,6 @@ node setup-wizard.js
 ### **🖨️ Periféricos Integrados**
 - ✅ **Impressora Térmica** - Suporte a múltiplos modelos
 - ✅ **Scanner de Código de Barras** - Leitura automática
-- ✅ **Setup Wizard** - Configuração automática
 
 ### **🧾 Sistema Fiscal**
 - ✅ **NF-e** - Nota Fiscal Eletrônica
@@ -82,11 +80,7 @@ node setup-wizard.js
 - 📱 Otimizado para touch
 - ⚡ Carregamento rápido
 
-### **Setup Wizard**
-- 🧭 Guia passo a passo
-- ⚙️ Configuração automática
-- 🧪 Testes integrados
-- 📋 Documentação inline
+
 
 ## 🛠️ **Tecnologias**
 
@@ -125,26 +119,16 @@ node setup-wizard.js
 
 ## 🚀 **Primeiro Acesso**
 
-1. **Execute o instalador:**
-   ```bash
-   ./install.sh
-   ```
-
-2. **Configure o banco de dados:**
-   - Execute os scripts SQL no Supabase
-   - Configure as variáveis de ambiente
-
-3. **Inicie o sistema:**
-   ```bash
-   ./start-all.sh
-   ```
-
-4. **Acesse o Setup Wizard:**
+1. **Acesse o sistema:**
    - Acesse: `http://localhost:5173`
-   - Siga o guia passo a passo
-   - Configure periféricos e fiscal
 
-5. **Comece a usar:**
+2. **Configure o sistema:**
+   - Configure dados da empresa
+   - Configure periféricos (impressora, scanner)
+   - Configure sistema fiscal
+   - Crie usuário administrador
+
+3. **Comece a usar:**
    - Cadastre produtos
    - Configure usuários
    - Teste uma venda
@@ -167,21 +151,29 @@ node setup-wizard.js
 
 ## 🏪 **Instalação em Loja**
 
-### **Processo Simplificado**
-1. **Baixar instalador:**
+### **Processo Manual**
+1. **Baixar projeto:**
    ```bash
-   wget https://github.com/seu-usuario/pdv-fiodegala/releases/latest/download/install.sh
+   git clone https://github.com/psnpupo/pdv-fiodegala.git
+   cd pdv-fiodegala
    ```
 
-2. **Executar instalação:**
+2. **Instalar dependências:**
    ```bash
-   chmod +x install.sh
-   ./install.sh
+   npm install
+   cd backend && npm install && cd ..
    ```
 
-3. **Configurar inicialização automática:**
+3. **Configurar ambiente:**
    ```bash
-   sudo systemctl enable pdv-fiodegala
+   cp backend/env.example backend/.env
+   # Editar backend/.env com credenciais do Supabase
+   ```
+
+4. **Configurar inicialização automática:**
+   ```bash
+   # Criar script de inicialização
+   # Configurar systemd ou cron
    ```
 
 ### **Configuração de Rede**
@@ -268,7 +260,6 @@ Contribuições são bem-vindas! Por favor, leia o [CONTRIBUTING.md](CONTRIBUTIN
 **Sistema PDV completo e profissional!**
 
 ### **Benefícios**
-- ✅ **Instalação automatizada** com Setup Wizard
 - ✅ **Interface moderna** e responsiva
 - ✅ **Periféricos integrados** (impressora + scanner)
 - ✅ **Sistema fiscal** completo (NF-e + SAT)
