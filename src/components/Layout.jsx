@@ -3,7 +3,23 @@ import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { getCurrentUser, logout, hasPermission, PERMISSIONS } from '@/lib/auth';
-import { ShoppingCart, Package, Users as UsersIcon, BarChart3, Settings, LogOut, Menu, X, CreditCard, Warehouse, Store, DollarSign, Tag } from 'lucide-react';
+import { 
+  Home, 
+  Package, 
+  ShoppingCart, 
+  BarChart3, 
+  Users, 
+  Settings, 
+  Tag,
+  Printer,
+  FileText,
+  Store,
+  Menu,
+  X,
+  LogOut,
+  DollarSign,
+  Warehouse
+} from 'lucide-react';
 
 const Layout = ({ onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -43,7 +59,7 @@ const Layout = ({ onLogout }) => {
     {
       id: 'customers',
       label: 'Clientes',
-      icon: UsersIcon,
+      icon: Users,
       path: '/customers',
       permission: PERMISSIONS.MANAGE_PRODUCTS 
     },
@@ -67,6 +83,13 @@ const Layout = ({ onLogout }) => {
       icon: DollarSign,
       path: '/cash-register',
       permission: PERMISSIONS.CASH_REGISTER_MANAGEMENT
+    },
+    {
+      id: 'peripherals',
+      label: 'Periféricos',
+      icon: Printer,
+      path: '/peripherals',
+      permission: PERMISSIONS.MANAGE_USERS
     }
   ];
 
@@ -224,6 +247,19 @@ const Layout = ({ onLogout }) => {
               </div>
             </div>
           </div>
+          {
+            hasPermission(PERMISSIONS.MANAGE_FISCAL_DOCUMENTS) && (
+              <Link
+                to="/fiscal-documents"
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 ${
+                  location.pathname === '/fiscal-documents' ? 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-50' : ''
+                }`}
+              >
+                <FileText className="h-4 w-4" />
+                Documentos Fiscais
+              </Link>
+            )
+          }
         </header>
 
         <main className="flex-1 p-6 overflow-auto">

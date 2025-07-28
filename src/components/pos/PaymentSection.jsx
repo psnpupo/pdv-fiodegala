@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CreditCard, Receipt } from 'lucide-react';
+import { CreditCard, Receipt, Printer } from 'lucide-react';
 
 export const PAYMENT_METHODS = {
   CASH: 'cash',
@@ -17,7 +17,7 @@ export const PAYMENT_LABELS = {
   [PAYMENT_METHODS.PIX]: 'PIX'
 };
 
-const PaymentSection = ({ cartLength, payments, totalPaid, remainingAmount, onAddPayment, onFinalizeSale, canFinalize }) => {
+const PaymentSection = ({ cartLength, payments, totalPaid, remainingAmount, onAddPayment, onFinalizeSale, canFinalize, onPrintReceipt, canPrintReceipt }) => {
   if (cartLength === 0) return null;
 
   return (
@@ -69,15 +69,29 @@ const PaymentSection = ({ cartLength, payments, totalPaid, remainingAmount, onAd
           ))}
         </div>
 
-        <Button
-          className="w-full"
-          size="lg"
-          onClick={onFinalizeSale}
-          disabled={!canFinalize}
-        >
-          <Receipt className="w-4 h-4 mr-2" />
-          Finalizar Venda
-        </Button>
+        <div className="grid grid-cols-1 gap-2">
+          <Button
+            className="w-full"
+            size="lg"
+            onClick={onFinalizeSale}
+            disabled={!canFinalize}
+          >
+            <Receipt className="w-4 h-4 mr-2" />
+            Finalizar Venda
+          </Button>
+          
+          {canPrintReceipt && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onPrintReceipt}
+              className="w-full"
+            >
+              <Printer className="w-4 h-4 mr-2" />
+              Imprimir Recibo
+            </Button>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

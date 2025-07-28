@@ -7,6 +7,8 @@ import {
 import { getCurrentCashRegisterState } from '@/lib/cashRegisterStorage';
 import { createSale, getProductByBarcode as fetchProductByBarcodeForPOS } from '@/lib/salesApi'; 
 import { getCurrentUser, hasPermission, PERMISSIONS, getUsers } from '@/lib/auth';
+import peripheralsService from '@/lib/peripheralsService';
+import fiscalService from '@/lib/fiscalService';
 
 import BarcodeScanner from '@/components/pos/BarcodeScanner';
 import CartDisplay from '@/components/pos/CartDisplay';
@@ -117,6 +119,68 @@ const POS = () => {
               
               const result = await createSale(saleData);
               
+              // Tentar imprimir recibo automaticamente
+              try {
+                const printerConfig = await peripheralsService.getConfig();
+                if (printerConfig.printer.enabled) {
+                  const saleDataForPrint = {
+                    ...result.sale,
+                    items: saleData.items,
+                    payments: saleData.payments,
+                    store_name: selectedStore?.name || 'Loja',
+                    user_id: user?.id,
+                    store_id: selectedStore?.id || user?.store_id
+                  };
+                  
+                  await peripheralsService.printReceipt(saleDataForPrint, printerConfig.printer);
+                  
+                  toast({ 
+                    title: 'Venda finalizada e recibo impresso!', 
+                    description: `Venda #${result.sale.id} criada e recibo impresso automaticamente.`, 
+                    variant: 'default' 
+                  });
+                } else {
+                  toast({ 
+                    title: 'Venda finalizada com sucesso!', 
+                    description: `Venda #${result.sale.id} criada.`, 
+                    variant: 'default' 
+                  });
+                }
+              } catch (printError) {
+                console.error('Erro ao imprimir recibo:', printError);
+                toast({ 
+                  title: 'Venda finalizada com sucesso!', 
+                  description: `Venda #${result.sale.id} criada. (Erro na impressão: ${printError.message})`, 
+                  variant: 'default' 
+                });
+              }
+
+              // Tentar gerar documento fiscal automaticamente
+              try {
+                const fiscalConfig = await fiscalService.getConfig();
+                if (fiscalConfig.nfe.enabled || fiscalConfig.sat.enabled) {
+                  const saleDataForFiscal = {
+                    ...result.sale,
+                    items: saleData.items,
+                    payments: saleData.payments,
+                    store_name: selectedStore?.name || 'Loja',
+                    user_id: user?.id,
+                    store_id: selectedStore?.id || user?.store_id
+                  };
+                  
+                  const fiscalResult = await fiscalService.generateFiscalDocument(saleDataForFiscal);
+                  
+                  toast({ 
+                    title: 'Documento fiscal gerado!', 
+                    description: `Documento fiscal gerado automaticamente para venda #${result.sale.id}.`, 
+                    variant: 'default' 
+                  });
+                }
+              } catch (fiscalError) {
+                console.error('Erro ao gerar documento fiscal:', fiscalError);
+                // Não mostrar erro para o usuário, apenas log
+              }
+              
               // Limpar carrinho e resetar wizard
               clearCart();
               setIsTroca(false);
@@ -125,11 +189,6 @@ const POS = () => {
               setPagamentosWizard([{ method: '', amount: '', parcelas: 1 }, { method: '', amount: '', parcelas: 1 }]);
               setNumPagamentos(1);
               
-              toast({ 
-                title: 'Venda finalizada com sucesso!', 
-                description: `Venda #${result.sale.id} criada.`, 
-                variant: 'default' 
-              });
             } catch (err) {
               toast({ 
                 title: 'Erro ao finalizar venda', 
@@ -340,9 +399,59 @@ const POS = () => {
     setPayments(prev => [...prev, { method, amount: parseFloat(amount.toFixed(2)), id: Date.now() }]);
   };
 
+  const handlePrintReceipt = async () => {
+    try {
+      const printerConfig = await peripheralsService.getConfig();
+      if (!printerConfig.printer.enabled) {
+        toast({ 
+          title: 'Impressora desabilitada', 
+          description: 'Configure a impressora nas configurações de periféricos.', 
+          variant: 'destructive' 
+        });
+        return;
+      }
+
+      const saleDataForPrint = {
+        id: `PREVIEW_${Date.now()}`,
+        items: cart.map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          subtotal: item.subtotal
+        })),
+        subtotal: calculateSubtotal(),
+        discount: calculateDiscountAmount(),
+        total: calculateTotal(),
+        payments: payments.map(p => ({
+          method: PAYMENT_LABELS[p.method],
+          amount: p.amount
+        })),
+        store_name: selectedStore?.name || 'Loja',
+        user_id: user?.id,
+        store_id: selectedStore?.id || user?.store_id
+      };
+      
+      await peripheralsService.printReceipt(saleDataForPrint, printerConfig.printer);
+      
+      toast({ 
+        title: 'Recibo impresso!', 
+        description: 'Recibo enviado para impressão com sucesso.', 
+        variant: 'default' 
+      });
+    } catch (error) {
+      console.error('Erro ao imprimir recibo:', error);
+      toast({ 
+        title: 'Erro ao imprimir recibo', 
+        description: error.message || 'Verifique a configuração da impressora.', 
+        variant: 'destructive' 
+      });
+    }
+  };
+
   const getTotalPaid = () => payments.reduce((sum, payment) => sum + payment.amount, 0);
   const getRemainingAmount = () => calculateTotal() - getTotalPaid();
   const canFinalizeSale = () => cart.length > 0 && getRemainingAmount() <= 0.001;
+  const canPrintReceipt = () => cart.length > 0;
 
   const handlePagamentoChange = (idx, field, value) => {
     setPagamentosWizard(prev => prev.map((p, i) => i === idx ? { ...p, [field]: value } : p));
@@ -509,6 +618,10 @@ const POS = () => {
           totalPaid={getTotalPaid()}
           remainingAmount={getRemainingAmount()}
           onAddPayment={addPayment}
+          onFinalizeSale={() => setStep(3)}
+          canFinalize={canFinalizeSale()}
+          onPrintReceipt={handlePrintReceipt}
+          canPrintReceipt={canPrintReceipt()}
         />
         {/* Controle de caixa movido para página exclusiva */}
         <Card className="glass-effect">

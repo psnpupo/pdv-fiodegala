@@ -12,6 +12,9 @@ import Customers from '@/components/Customers';
 import Reports from '@/components/Reports';
 import Users from '@/components/Users';
 import CashRegister from '@/components/CashRegister';
+import PeripheralSettings from '@/components/settings/PeripheralSettings';
+import FiscalDocuments from '@/components/fiscal/FiscalDocuments';
+import SetupWizard from '@/components/setup/SetupWizard';
 import { getCurrentUser, hasPermission, PERMISSIONS, authenticateUser, setCurrentUser as setLocalCurrentUser, logout as localLogout } from '@/lib/auth';
 import { supabase } from '@/lib/supabaseClient';
 import { useToast } from '@/components/ui/use-toast';
@@ -27,9 +30,10 @@ const ProtectedRoute = ({ element, requiredPermission, user }) => {
   return element;
 };
 
-const App = () => {
+function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showSetupWizard, setShowSetupWizard] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -81,6 +85,34 @@ const App = () => {
     };
   }, [toast]);
 
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const currentUser = await getCurrentUser();
+        setUser(currentUser);
+        
+        // Verificar se é primeiro acesso (sem configurações)
+        if (currentUser) {
+          try {
+            const config = await fetch('/api/peripherals/config').then(r => r.json());
+            if (!config.success) {
+              setShowSetupWizard(true);
+            }
+          } catch (error) {
+            // Se não conseguir acessar configurações, mostrar wizard
+            setShowSetupWizard(true);
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao verificar usuário:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkUser();
+  }, []);
+
   const handleLogin = (userData) => {
     setUser(userData);
     setLocalCurrentUser(userData);
@@ -96,6 +128,14 @@ const App = () => {
       <div className="min-h-screen flex items-center justify-center gradient-bg">
         <div className="loading-spinner w-8 h-8 border-4 border-white border-t-transparent rounded-full"></div>
       </div>
+    );
+  }
+
+  if (showSetupWizard) {
+    return (
+      <SetupWizard 
+        onComplete={() => setShowSetupWizard(false)} 
+      />
     );
   }
 
@@ -119,6 +159,15 @@ const App = () => {
           <Route path="reports" element={<ProtectedRoute user={user} element={<Reports />} requiredPermission={PERMISSIONS.VIEW_REPORTS} />} />
           <Route path="users" element={<ProtectedRoute user={user} element={<Users />} requiredPermission={PERMISSIONS.MANAGE_USERS} />} />
           <Route path="cash-register" element={<ProtectedRoute user={user} element={<CashRegister />} requiredPermission={PERMISSIONS.CASH_REGISTER_MANAGEMENT} />} />
+          <Route path="peripherals" element={<ProtectedRoute user={user} element={<PeripheralSettings />} requiredPermission={PERMISSIONS.MANAGE_USERS} />} />
+          <Route 
+            path="/fiscal-documents" 
+            element={
+              <ProtectedRoute permission={PERMISSIONS.MANAGE_FISCAL_DOCUMENTS}>
+                <FiscalDocuments />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />
         </Route>
       </Routes>

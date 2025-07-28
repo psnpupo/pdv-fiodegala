@@ -13,12 +13,16 @@ const clientesRoutes = require('./routes/clientes');
 const usuariosRoutes = require('./routes/usuarios');
 const salesRoutes = require('./routes/sales');
 const cashRegisterRoutes = require('./routes/cashRegister');
+const peripheralsRoutes = require('./routes/peripherals');
+const fiscalRoutes = require('./routes/fiscal');
 
 app.use('/api/status', statusRoutes);
 app.use('/api/clientes', clientesRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/sales', salesRoutes);
 app.use('/api/cash-register', cashRegisterRoutes);
+app.use('/api/peripherals', peripheralsRoutes);
+app.use('/api/fiscal', fiscalRoutes);
 
 app.get('/', (req, res) => {
   res.json({ status: 'Backend PDV Fio de Gala rodando!', env: process.env.NODE_ENV || 'dev' });
