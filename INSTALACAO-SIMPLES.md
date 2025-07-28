@@ -10,9 +10,15 @@ Antes de começar, você precisa ter instalado:
 ## 🎯 Instalação Automática (Recomendado)
 
 ### Windows:
-1. Baixe o arquivo: [setup-pdv.bat](https://raw.githubusercontent.com/psnpupo/pdv-fiodegala/main/setup-pdv.bat)
-2. Execute o arquivo `setup-pdv.bat`
-3. Siga as instruções na tela
+```powershell
+# Opção 1: PowerShell (Recomendado)
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/psnpupo/pdv-fiodegala/main/setup-pdv.ps1" -OutFile "setup-pdv.ps1"
+.\setup-pdv.ps1
+
+# Opção 2: Batch
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/psnpupo/pdv-fiodegala/main/setup-pdv.bat" -OutFile "setup-pdv.bat"
+.\setup-pdv.bat
+```
 
 ### Linux/macOS:
 ```bash
