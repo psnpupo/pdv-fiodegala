@@ -7,53 +7,40 @@
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-orange.svg)](https://supabase.com/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-## 🚀 **Instalação Rápida**
+## 🚀 **Instalação Super Simples**
 
-### **Windows**
-```powershell
-# 1. Verificar pré-requisitos
-git --version
-node --version
-npm --version
+### **⚡ Instalação Automática (Recomendado)**
 
-# 2. Baixar projeto
-cd $env:USERPROFILE\Documents
-git clone https://github.com/psnpupo/pdv-fiodegala.git
-cd pdv-fiodegala
+#### **Windows:**
+1. **Baixe o instalador:** [setup-pdv.bat](https://raw.githubusercontent.com/psnpupo/pdv-fiodegala/main/setup-pdv.bat)
+2. **Execute o arquivo** `setup-pdv.bat`
+3. **Siga as instruções** na tela
 
-# 3. Instalar dependências
-npm install
-cd backend && npm install && cd ..
-
-# 4. Configurar ambiente
-copy backend\env.example backend\.env
-# Editar backend\.env com suas credenciais do Supabase
-
-# 5. Executar scripts SQL no Supabase
-# - tools/fix-peripherals-tables.sql
-# - tools/create-fiscal-tables.sql
-# - tools/create-scan-logs-table.sql
-
-# 6. Iniciar sistema
-cd backend && npm start  # Terminal 1
-npm run dev              # Terminal 2
-```
-
-### **Linux/macOS**
+#### **Linux/macOS:**
 ```bash
-# 1. Instalação automatizada
-curl -fsSL https://raw.githubusercontent.com/psnpupo/pdv-fiodegala/main/install.sh | bash
+# Baixar e executar em uma linha
+curl -sSL https://raw.githubusercontent.com/psnpupo/pdv-fiodegala/main/setup-pdv.sh | bash
+```
 
-# 2. Ou instalação manual
+### **🔧 Instalação Manual**
+
+#### **1. Baixar o projeto:**
+```bash
 git clone https://github.com/psnpupo/pdv-fiodegala.git
 cd pdv-fiodegala
-npm install
-cd backend && npm install && cd ..
-cp backend/env.example backend/.env
-# Editar backend/.env com suas credenciais do Supabase
-cd backend && npm start  # Terminal 1
-npm run dev              # Terminal 2
 ```
+
+#### **2. Executar Setup Wizard:**
+```bash
+node setup-wizard.js
+```
+
+#### **3. Seguir as instruções do Setup Wizard:**
+- ✅ Instalar dependências
+- ✅ Configurar Supabase Cloud
+- ✅ Executar scripts SQL
+- ✅ Testar conexão
+- ✅ Criar scripts de inicialização
 
 ### **Guias Detalhados**
 - **Windows:** `INSTALACAO-WINDOWS.md`
