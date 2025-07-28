@@ -49,9 +49,9 @@ node setup-wizard.js
 - ✅ Criar scripts de inicialização
 
 ### **Guias Detalhados**
-- **Windows:** `INSTALACAO-WINDOWS.md`
-- **Rápida:** `INSTALACAO-RAPIDA.md`
-- **Completa:** `GUIA-INSTALACAO.md`
+- **Instalação Simples:** `docs/INSTALACAO-SIMPLES.md`
+- **Guia Completo:** `docs/GUIA-COMPLETO-SISTEMA.md`
+- **Instalação Detalhada:** `docs/GUIA-INSTALACAO.md`
 
 ## ✨ **Funcionalidades**
 
@@ -151,12 +151,14 @@ node setup-wizard.js
 
 ## 📚 **Documentação**
 
+📖 **[Ver toda a documentação](docs/README.md)**
+
 ### **Guias Principais**
-- 📄 [Guia Completo](GUIA-COMPLETO-SISTEMA.md) - Documentação principal
-- 📄 [Guia de Instalação](GUIA-INSTALACAO.md) - Instalação detalhada
-- 📄 [Guia da Impressora](GUIA-IMPRESSORA.md) - Configuração de periféricos
-- 📄 [Guia do Scanner](GUIA-SCANNER-CODIGO-BARRAS.md) - Scanner de código de barras
-- 📄 [Guia Fiscal](GUIA-SISTEMA-FISCAL.md) - Sistema fiscal
+- 📄 [Guia Completo](docs/GUIA-COMPLETO-SISTEMA.md) - Documentação principal
+- 📄 [Guia de Instalação](docs/GUIA-INSTALACAO.md) - Instalação detalhada
+- 📄 [Guia da Impressora](docs/GUIA-PERIFERICOS.md) - Configuração de periféricos
+- 📄 [Guia do Scanner](docs/GUIA-SCANNER-CODIGO-BARRAS.md) - Scanner de código de barras
+- 📄 [Guia Fiscal](docs/GUIA-SISTEMA-FISCAL.md) - Sistema fiscal
 
 ### **Scripts SQL**
 - 🔧 [Corrigir Periféricos](tools/fix-peripherals-tables.sql)
