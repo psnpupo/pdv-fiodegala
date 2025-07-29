@@ -6,6 +6,7 @@ Esta pasta contém toda a documentação do sistema PDV Fio de Gala.
 
 ### 🚀 **Instalação e Configuração**
 - **[GUIA-INSTALACAO.md](GUIA-INSTALACAO.md)** - Instalação detalhada e completa
+- **[GUIA-INSTALACAO-ZIP.md](GUIA-INSTALACAO-ZIP.md)** - Instalação via ZIP (múltiplas máquinas)
 
 ### 📖 **Guias do Sistema**
 - **[GUIA-COMPLETO-SISTEMA.md](GUIA-COMPLETO-SISTEMA.md)** - Documentação completa do sistema
@@ -18,6 +19,9 @@ Esta pasta contém toda a documentação do sistema PDV Fio de Gala.
 ### **Para clientes novos:**
 1. **[GUIA-INSTALACAO.md](GUIA-INSTALACAO.md)** - Instalação passo a passo
 2. **[GUIA-COMPLETO-SISTEMA.md](GUIA-COMPLETO-SISTEMA.md)** - Conhecer o sistema
+
+### **Para instalar em múltiplas máquinas:**
+1. **[GUIA-INSTALACAO-ZIP.md](GUIA-INSTALACAO-ZIP.md)** - Instalação via ZIP
 
 ### **Para configuração de periféricos:**
 1. **[GUIA-PERIFERICOS.md](GUIA-PERIFERICOS.md)** - Impressora térmica
