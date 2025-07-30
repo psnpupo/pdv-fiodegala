@@ -82,24 +82,24 @@ const BarcodeScanner = ({ onProductFound }) => {
         <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-2">
           <Button 
             variant="outline" 
-            onClick={() => quickAddProduct('7891234567890')}
+            onClick={() => quickAddProduct('6307CB')}
             className="text-sm"
           >
             Camiseta Básica
           </Button>
           <Button 
             variant="outline" 
-            onClick={() => quickAddProduct('7891234567891')}
+            onClick={() => quickAddProduct('7182CSR')}
             className="text-sm"
           >
-            Calça Jeans
+            Calça com Regulagem
           </Button>
           <Button 
             variant="outline" 
-            onClick={() => quickAddProduct('7891234567892')}
+            onClick={() => quickAddProduct('4411GM')}
             className="text-sm"
           >
-            Vestido Floral
+            Gola Média
           </Button>
         </div>
       </CardContent>
