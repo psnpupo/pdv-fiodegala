@@ -176,7 +176,7 @@ npm run dev
 - ✅ Cadastro completo de produtos
 - ✅ Categorização
 - ✅ Imagens de produtos
-- ✅ Variações de preço (varejo, atacado, atacarejo)
+- ✅ Variações de preço (varejo, atacado, cliente exclusivo)
 - ✅ Códigos de barras
 - ✅ Controle de estoque
 

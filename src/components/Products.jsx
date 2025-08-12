@@ -128,8 +128,52 @@ const Products = () => {
 
       if (editingProduct) {
         console.log('✏️ Atualizando produto...');
-        await updateProduct(editingProduct.id, processedProductData);
-        toast({ title: "Produto atualizado!", description: `${processedProductData.name} foi atualizado.` });
+        
+        // Remover campos extras que não existem na tabela products
+        const { syncWithWooCommerce, uploadedImageUrls, ...cleanProductData } = processedProductData;
+        
+        const updatedProduct = await updateProduct(editingProduct.id, cleanProductData);
+        console.log('✅ Produto atualizado com sucesso:', updatedProduct);
+        
+        // Sincronização com WooCommerce após produto ser atualizado
+        if (productData.syncWithWooCommerce && editingProduct.woocommerce_id) {
+          try {
+            const WooCommerceService = (await import('@/lib/woocommerceService')).default;
+            const woocommerceService = new WooCommerceService();
+            
+            const woocommerceData = {
+              name: updatedProduct.name,
+              price: updatedProduct.price,
+              description: updatedProduct.description || '',
+              short_description: updatedProduct.short_description || '',
+              barcode: updatedProduct.barcode,
+              stock: updatedProduct.stock,
+              category: updatedProduct.category,
+              images: productData.uploadedImageUrls || [],
+              weight: updatedProduct.weight,
+              length: updatedProduct.length,
+              height: updatedProduct.height,
+              width: updatedProduct.width
+            };
+
+            const woocommerceResult = await woocommerceService.updateProduct(editingProduct.woocommerce_id, woocommerceData);
+            console.log('✅ Produto atualizado no WooCommerce:', woocommerceResult);
+            
+            toast({ 
+              title: "Produto atualizado e sincronizado!", 
+              description: `${processedProductData.name} foi atualizado no PDV e no WooCommerce.` 
+            });
+          } catch (error) {
+            console.error('❌ Erro na sincronização WooCommerce:', error);
+            toast({ 
+              title: "Produto atualizado (erro WooCommerce)", 
+              description: `${processedProductData.name} foi atualizado no PDV, mas houve erro na sincronização com WooCommerce.`,
+              variant: "destructive"
+            });
+          }
+        } else {
+          toast({ title: "Produto atualizado!", description: `${processedProductData.name} foi atualizado.` });
+        }
       } else {
         console.log('🔍 Verificando código de barras duplicado...');
         const allDbProducts = await getAllProducts(); 
@@ -143,9 +187,52 @@ const Products = () => {
         }
         
         console.log('✅ Criando produto...');
-        const newProduct = await addProduct(processedProductData);
+        
+        // Remover campos extras que não existem na tabela products
+        const { syncWithWooCommerce, uploadedImageUrls, ...cleanProductData } = processedProductData;
+        
+        const newProduct = await addProduct(cleanProductData);
         console.log('✅ Produto criado com sucesso:', newProduct);
-        toast({ title: "Produto criado!", description: `${processedProductData.name} foi criado.` });
+        
+        // Sincronização com WooCommerce após produto ser criado
+        if (productData.syncWithWooCommerce) {
+          try {
+            const WooCommerceService = (await import('@/lib/woocommerceService')).default;
+            const woocommerceService = new WooCommerceService();
+            
+            const woocommerceData = {
+              name: newProduct.name,
+              price: newProduct.price,
+              description: newProduct.description || '',
+              short_description: newProduct.short_description || '',
+              barcode: newProduct.barcode,
+              stock: newProduct.stock,
+              category: newProduct.category,
+              images: productData.uploadedImageUrls || [],
+              weight: newProduct.weight,
+              length: newProduct.length,
+              height: newProduct.height,
+              width: newProduct.width
+            };
+
+            const woocommerceResult = await woocommerceService.createProduct(woocommerceData);
+            console.log('✅ Produto sincronizado com WooCommerce:', woocommerceResult);
+            
+            toast({ 
+              title: "Produto criado e sincronizado!", 
+              description: `${processedProductData.name} foi criado no PDV e no WooCommerce.` 
+            });
+          } catch (error) {
+            console.error('❌ Erro na sincronização WooCommerce:', error);
+            toast({ 
+              title: "Produto criado (erro WooCommerce)", 
+              description: `${processedProductData.name} foi criado no PDV, mas houve erro na sincronização com WooCommerce.`,
+              variant: "destructive"
+            });
+          }
+        } else {
+          toast({ title: "Produto criado!", description: `${processedProductData.name} foi criado.` });
+        }
       }
       fetchProductsAndStoresData();
       setShowFormDialog(false);
@@ -183,14 +270,38 @@ const Products = () => {
     }
   };
 
-  const handleDelete = async (productId) => {
+  const handleDelete = async (product) => {
     if (!window.confirm("Deseja realmente excluir este produto? Esta ação é irreversível!")) {
         return;
     }
     setLoading(true);
     try {
-      await deleteProduct(productId);
-      toast({ title: "Produto excluído!", description: "O produto foi removido do sistema." });
+      // Excluir do PDV
+      await deleteProduct(product.id);
+      
+      // Excluir do WooCommerce se tiver ID
+      if (product.woocommerce_id) {
+        try {
+          const WooCommerceService = (await import('@/lib/woocommerceService')).default;
+          const woocommerceService = new WooCommerceService();
+          await woocommerceService.deleteProduct(product.woocommerce_id);
+          console.log('✅ Produto excluído do WooCommerce');
+          toast({ 
+            title: "Produto excluído!", 
+            description: "O produto foi removido do PDV e do WooCommerce." 
+          });
+        } catch (wooError) {
+          console.error('❌ Erro ao excluir do WooCommerce:', wooError);
+          toast({ 
+            title: "Produto excluído (erro WooCommerce)", 
+            description: "O produto foi removido do PDV, mas houve erro ao excluir do WooCommerce.",
+            variant: "destructive"
+          });
+        }
+      } else {
+        toast({ title: "Produto excluído!", description: "O produto foi removido do sistema." });
+      }
+      
       fetchProductsAndStoresData(); 
     } catch (error) {
       toast({ title: "Erro ao excluir produto", description: error.message, variant: "destructive" });

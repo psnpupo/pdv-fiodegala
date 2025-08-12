@@ -409,32 +409,72 @@ const Stock = () => {
 
         {/* Cards de resumo */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="rounded-xl bg-card border border-border p-4 flex items-center gap-3 shadow-sm">
+          <div className="rounded-xl bg-card border border-border p-4 flex items-center gap-3 shadow-sm h-20">
             <Package className="w-7 h-7 text-green-500" />
             <div>
               <p className="text-2xl font-bold text-foreground">{getTotalActiveProducts()}</p>
               <p className="text-xs text-muted-foreground">Produtos Ativos</p>
             </div>
           </div>
-          <div className="rounded-xl bg-card border border-border p-4 flex items-center gap-3 shadow-sm">
+          <div className="rounded-xl bg-card border border-border p-4 flex items-center gap-3 shadow-sm h-20">
             <TrendingUp className="w-7 h-7 text-blue-500" />
             <div>
               <p className="text-2xl font-bold text-foreground">{getTotalOnlineStock()}</p>
               <p className="text-xs text-muted-foreground">Estoque Online</p>
             </div>
           </div>
-          <div className="rounded-xl bg-card border border-border p-4 flex items-center gap-3 shadow-sm">
+          <div className="rounded-xl bg-card border border-border p-4 flex items-center gap-3 shadow-sm h-20">
             <TrendingDown className="w-7 h-7 text-orange-500" />
             <div>
               <p className="text-2xl font-bold text-foreground">{getLowStockCount()}</p>
               <p className="text-xs text-muted-foreground">Estoque Baixo</p>
             </div>
           </div>
-          <div className="rounded-xl bg-card border border-border p-4 flex items-center gap-3 shadow-sm">
+          <div className="rounded-xl bg-card border border-border p-4 flex items-center gap-3 shadow-sm h-20">
             <History className="w-7 h-7 text-purple-500" />
             <div>
               <p className="text-2xl font-bold text-foreground">{movements.length}</p>
               <p className="text-xs text-muted-foreground">Movimentações</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Cards de estoque por loja */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-foreground mb-4 text-center">Estoque por Loja</h2>
+          <div className="flex justify-center">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-auto">
+              {/* Card da Loja Online */}
+              <div className="rounded-xl bg-card border border-border p-4 flex items-center gap-3 shadow-sm h-20">
+                <div className="w-7 h-7 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-xs">
+                    O
+                  </span>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-foreground">Loja Online</p>
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                    {getTotalOnlineStock()} un.
+                  </p>
+                </div>
+              </div>
+
+              {/* Cards das Lojas Físicas */}
+              {physicalStoresForSelect.map((store) => (
+                <div key={store.id} className="rounded-xl bg-card border border-border p-4 flex items-center gap-3 shadow-sm h-20">
+                  <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-xs">
+                      {store.name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-foreground">{store.name}</p>
+                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                      {getTotalStockByStore(store.id)} un.
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -483,6 +523,15 @@ const Stock = () => {
                     <span className="text-xs text-foreground bg-muted rounded px-2 py-0.5">
                       Online: <b>{product.stock}</b> un.
                     </span>
+                    {physicalStoresForSelect.map((store) => {
+                      const storeStock = product.physicalStocks?.find(ps => ps.store_id === store.id);
+                      const quantity = storeStock ? storeStock.quantity : 0;
+                      return (
+                        <span key={store.id} className="text-xs text-foreground bg-muted rounded px-2 py-0.5">
+                          {store.name}: <b>{quantity}</b> un.
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
                 <div className="flex flex-col md:items-end gap-1">

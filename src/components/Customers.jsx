@@ -55,7 +55,7 @@ const Customers = () => {
   // Contadores por categoria
   const totalVarejo = customers.filter(c => c.category === 'Varejo').length;
   const totalAtacado = customers.filter(c => c.category === 'Atacado').length;
-  const totalAtacarejo = customers.filter(c => c.category === 'Atacarejo').length;
+  const totalClienteExclusivo = customers.filter(c => c.category === 'Cliente Exclusivo').length;
 
   // Filtros
   const [filterCategory, setFilterCategory] = useState('');
@@ -233,8 +233,8 @@ const Customers = () => {
             <div className="flex items-center space-x-2">
               <UserIcon className="w-8 h-8 text-purple-500" />
               <div>
-                <p className="text-2xl font-bold">{totalAtacarejo}</p>
-                <p className="text-sm text-muted-foreground">Clientes de Atacarejo</p>
+                <p className="text-2xl font-bold">{totalClienteExclusivo}</p>
+<p className="text-sm text-muted-foreground">Clientes Exclusivos</p>
               </div>
             </div>
           </CardContent>
@@ -257,7 +257,7 @@ const Customers = () => {
           <option value="">Todas as Categorias</option>
           <option value="Varejo">Varejo</option>
           <option value="Atacado">Atacado</option>
-          <option value="Atacarejo">Atacarejo</option>
+          <option value="Cliente Exclusivo">Cliente Exclusivo</option>
         </select>
         <Input
           placeholder="Buscar por CPF ou CNPJ..."

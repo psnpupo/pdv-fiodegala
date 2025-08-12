@@ -313,14 +313,14 @@ const CashRegister = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="text-center p-4 border rounded-lg">
+                <div className="text-center p-4 border border-gray-600 rounded-lg bg-gray-800">
                   <p className="text-sm text-muted-foreground">Status</p>
                   <p className={`text-lg font-bold ${cashRegister.isOpen ? 'text-green-600' : 'text-red-600'}`}>
                     {cashRegister.isOpen ? 'ABERTO' : 'FECHADO'}
                   </p>
                 </div>
                 
-                <div className="text-center p-4 border rounded-lg">
+                <div className="text-center p-4 border border-gray-600 rounded-lg bg-gray-800">
                   <p className="text-sm text-muted-foreground">Valor Atual</p>
                   <p className="text-2xl font-bold">
                     {formatCurrency(cashRegister.currentAmount)}
@@ -330,17 +330,17 @@ const CashRegister = () => {
 
               {cashRegister.isOpen && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-3 border rounded-lg">
+                  <div className="text-center p-3 border border-gray-600 rounded-lg bg-gray-800">
                     <p className="text-sm text-muted-foreground">Valor Inicial</p>
                     <p className="font-bold">{formatCurrency(cashRegister.openingAmount)}</p>
                   </div>
                   
-                  <div className="text-center p-3 border rounded-lg">
+                  <div className="text-center p-3 border border-gray-600 rounded-lg bg-gray-800">
                     <p className="text-sm text-muted-foreground">Aberto por</p>
                     <p className="font-bold">{cashRegister.openedBy || 'N/A'}</p>
                   </div>
                   
-                  <div className="text-center p-3 border rounded-lg">
+                  <div className="text-center p-3 border border-gray-600 rounded-lg bg-gray-800">
                     <p className="text-sm text-muted-foreground">Aberto em</p>
                     <p className="font-bold">{cashRegister.openedAt ? formatDate(cashRegister.openedAt) : 'N/A'}</p>
                   </div>
@@ -349,12 +349,12 @@ const CashRegister = () => {
 
               {!cashRegister.isOpen && cashRegister.closedAt && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="text-center p-3 border rounded-lg">
+                  <div className="text-center p-3 border border-gray-600 rounded-lg bg-gray-800">
                     <p className="text-sm text-muted-foreground">Fechado em</p>
                     <p className="font-bold">{formatDate(cashRegister.closedAt)}</p>
                   </div>
                   
-                  <div className="text-center p-3 border rounded-lg">
+                  <div className="text-center p-3 border border-gray-600 rounded-lg bg-gray-800">
                     <p className="text-sm text-muted-foreground">Valor Final</p>
                     <p className="font-bold">{formatCurrency(cashRegister.currentAmount)}</p>
                   </div>
@@ -590,7 +590,7 @@ const CashRegister = () => {
             <CardContent>
               <div className="space-y-4">
                 {logs.map((log) => (
-                  <div key={log.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div key={log.id} className="flex items-center justify-between p-4 border border-gray-600 rounded-lg bg-gray-800">
                     <div className="flex items-center gap-3">
                       {log.type === 'open' && <Unlock className="w-5 h-5 text-green-500" />}
                       {log.type === 'close' && <Lock className="w-5 h-5 text-red-500" />}

@@ -9,10 +9,12 @@ import ProductDetail from '@/components/products/ProductDetail';
 import Stock from '@/components/Stock';
 import Categories from '@/components/Categories';
 import Customers from '@/components/Customers';
+import CustomerGroups from '@/components/CustomerGroups';
 import Reports from '@/components/Reports';
 import Users from '@/components/Users';
 import CashRegister from '@/components/CashRegister';
 import PeripheralSettings from '@/components/settings/PeripheralSettings';
+import InterestRatesSettings from '@/components/settings/InterestRatesSettings';
 import FiscalDocuments from '@/components/fiscal/FiscalDocuments';
 
 import { getCurrentUser, hasPermission, PERMISSIONS, authenticateUser, setCurrentUser as setLocalCurrentUser, logout as localLogout } from '@/lib/auth';
@@ -139,10 +141,12 @@ function App() {
           <Route path="categories" element={<ProtectedRoute user={user} element={<Categories />} requiredPermission={PERMISSIONS.MANAGE_CATEGORIES} />} />
           <Route path="stock" element={<ProtectedRoute user={user} element={<Stock />} requiredPermission={PERMISSIONS.MANAGE_STOCK} />} />
           <Route path="customers" element={<ProtectedRoute user={user} element={<Customers />} requiredPermission={PERMISSIONS.MANAGE_PRODUCTS} />} />
+          <Route path="customer-groups" element={<ProtectedRoute user={user} element={<CustomerGroups />} requiredPermission={PERMISSIONS.MANAGE_PRODUCTS} />} />
           <Route path="reports" element={<ProtectedRoute user={user} element={<Reports />} requiredPermission={PERMISSIONS.VIEW_REPORTS} />} />
           <Route path="users" element={<ProtectedRoute user={user} element={<Users />} requiredPermission={PERMISSIONS.MANAGE_USERS} />} />
           <Route path="cash-register" element={<ProtectedRoute user={user} element={<CashRegister />} requiredPermission={PERMISSIONS.CASH_REGISTER_MANAGEMENT} />} />
           <Route path="peripherals" element={<ProtectedRoute user={user} element={<PeripheralSettings />} requiredPermission={PERMISSIONS.MANAGE_USERS} />} />
+          <Route path="interest-rates" element={<ProtectedRoute user={user} element={<InterestRatesSettings />} requiredPermission={PERMISSIONS.MANAGE_USERS} />} />
           <Route 
             path="/fiscal-documents" 
             element={

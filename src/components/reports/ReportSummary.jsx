@@ -23,7 +23,7 @@ const ReportSummary = ({ totalRevenue, totalSales, averageTicket, totalItemsSold
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{item.value}</p>
-                  <p className="text-sm text-muted-foreground">{item.label}</p>
+                  <p className="text-sm text-gray-400">{item.label}</p>
                 </div>
               </div>
             </CardContent>

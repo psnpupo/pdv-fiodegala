@@ -382,8 +382,8 @@ exports.getProductByBarcode = async (req, res) => {
       precoFinal = product.price_varejo;
     } else if (modalidade === 'atacado' && product.price_atacado != null) {
       precoFinal = product.price_atacado;
-    } else if (modalidade === 'atacarejo' && product.price_atacarejo != null) {
-      precoFinal = product.price_atacarejo;
+    } else if (modalidade === 'cliente_exclusivo' && product.price_atacarejo != null) {
+precoFinal = product.price_atacarejo;
     }
 
     // Calcular estoque disponível

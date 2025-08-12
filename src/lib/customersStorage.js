@@ -3,7 +3,14 @@ import { supabase } from './supabaseClient';
 export const getCustomers = async () => {
   const { data, error } = await supabase
     .from('customers')
-    .select('*')
+    .select(`
+      *,
+      customer_groups (
+        id,
+        name,
+        average_ticket
+      )
+    `)
     .order('name', { ascending: true });
   if (error) {
     console.error('Error fetching customers:', error);

@@ -24,15 +24,21 @@ const Reports = () => {
   const [sales, setSales] = useState([]);
   const [dateFilter, setDateFilter] = useState('today');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { toast } = useToast();
 
   const fetchSalesData = useCallback(async () => {
     setLoading(true);
     try {
+      console.log('Carregando dados de vendas...');
       const salesData = await getSales();
+      console.log('Dados carregados:', salesData);
       setSales(salesData || []);
     } catch (error) {
+      console.error('Erro ao carregar vendas:', error);
+      setError(error.message);
       toast({ title: "Erro ao carregar vendas", description: error.message, variant: "destructive" });
+      setSales([]); // Garantir que sempre tenha um array
     } finally {
       setLoading(false);
     }
@@ -157,11 +163,36 @@ const Reports = () => {
   };
   
   if (loading) {
-    return <div className="flex justify-center items-center h-64"><div className="loading-spinner"></div></div>;
+    return (
+      <div className="space-y-6 bg-gray-900 text-white min-h-screen p-6">
+        <div className="flex justify-center items-center h-64">
+          <div className="text-center">
+            <div className="loading-spinner mb-4"></div>
+            <p>Carregando relatórios...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6 bg-gray-900 text-white min-h-screen p-6">
+        <div className="flex justify-center items-center h-64">
+          <div className="text-center">
+            <p className="text-red-400 mb-4">Erro ao carregar relatórios</p>
+            <p className="text-gray-400 mb-4">{error}</p>
+            <Button onClick={fetchSalesData} variant="outline">
+              Tentar novamente
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-gray-900 text-white min-h-screen p-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold">Relatórios</h1>
@@ -181,35 +212,44 @@ const Reports = () => {
         </div>
       </div>
 
-      <ReportSummary
-        totalRevenue={reportData.totalRevenue}
-        totalSales={reportData.totalSales}
-        averageTicket={reportData.averageTicket}
-        totalItemsSold={reportData.totalItemsSold}
-      />
+      {sales.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-gray-400 mb-4">Nenhuma venda encontrada para o período selecionado.</p>
+          <p className="text-sm text-gray-500">Tente selecionar um período diferente ou aguarde novas vendas.</p>
+        </div>
+      ) : (
+        <ReportSummary
+          totalRevenue={reportData.totalRevenue}
+          totalSales={reportData.totalSales}
+          averageTicket={reportData.averageTicket}
+          totalItemsSold={reportData.totalItemsSold}
+        />
+      )}
 
-      <Tabs defaultValue="sales" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
-          <TabsTrigger value="sales">Vendas</TabsTrigger>
-          <TabsTrigger value="products">Produtos</TabsTrigger>
-          <TabsTrigger value="payments">Pagamentos</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-        </TabsList>
+      {sales.length > 0 && (
+        <Tabs defaultValue="sales" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
+            <TabsTrigger value="sales">Vendas</TabsTrigger>
+            <TabsTrigger value="products">Produtos</TabsTrigger>
+            <TabsTrigger value="payments">Pagamentos</TabsTrigger>
+            <TabsTrigger value="performance">Performance</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="sales"><SalesTab sales={filteredSales} salesByHour={reportData.salesByHour} /></TabsContent>
-        <TabsContent value="products"><ProductsTab topProducts={reportData.topProducts} /></TabsContent>
-        <TabsContent value="payments"><PaymentsTab paymentMethodStats={reportData.paymentMethodStats} totalRevenue={reportData.totalRevenue} /></TabsContent>
-        <TabsContent value="performance">
-          <PerformanceTab
-            salesByUser={reportData.salesByUser}
-            dateFilter={dateFilter}
-            totalSales={reportData.totalSales}
-            totalRevenue={reportData.totalRevenue}
-            averageTicket={reportData.averageTicket}
-            totalItemsSold={reportData.totalItemsSold}
-          />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="sales"><SalesTab sales={filteredSales} salesByHour={reportData.salesByHour} /></TabsContent>
+          <TabsContent value="products"><ProductsTab topProducts={reportData.topProducts} /></TabsContent>
+          <TabsContent value="payments"><PaymentsTab paymentMethodStats={reportData.paymentMethodStats} totalRevenue={reportData.totalRevenue} /></TabsContent>
+          <TabsContent value="performance">
+            <PerformanceTab
+              salesByUser={reportData.salesByUser}
+              dateFilter={dateFilter}
+              totalSales={reportData.totalSales}
+              totalRevenue={reportData.totalRevenue}
+              averageTicket={reportData.averageTicket}
+              totalItemsSold={reportData.totalItemsSold}
+            />
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
   );
 };

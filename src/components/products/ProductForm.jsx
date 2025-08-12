@@ -13,6 +13,8 @@ import ProductFormFields, { PRODUCT_TYPES } from './ProductFormFields';
 import ProductVariationsForm from './ProductVariationsForm';
 import ProductImageUpload from './ProductImageUpload';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import WooCommerceService from '@/lib/woocommerceService';
 
 const ProductForm = ({ open, onOpenChange, formData, setFormData, onSubmit, editingProduct, resetForm, onStockShared }) => {
   const [physicalStores, setPhysicalStores] = useState([]);
@@ -33,6 +35,9 @@ const ProductForm = ({ open, onOpenChange, formData, setFormData, onSubmit, edit
   const [medidas, setMedidas] = useState(formData.medidas || {
     ombro: '', busto: '', cintura: '', quadril: '', comprimento: '', manga: '', tornozelo: ''
   });
+  const [syncWithWooCommerce, setSyncWithWooCommerce] = useState(false);
+  const [woocommerceId, setWooCommerceId] = useState('');
+  const [isWooCommerceConnected, setIsWooCommerceConnected] = useState(false);
 
   const mainImageInputRef = useRef(null);
   
@@ -87,6 +92,27 @@ const ProductForm = ({ open, onOpenChange, formData, setFormData, onSubmit, edit
   useEffect(() => {
     setMedidas(formData.medidas || { ombro: '', busto: '', cintura: '', quadril: '', comprimento: '', manga: '', tornozelo: '' });
   }, [formData.medidas]);
+
+  // Testar conexão com WooCommerce
+  const testWooCommerceConnection = async () => {
+    try {
+      const woocommerceService = new WooCommerceService();
+      await woocommerceService.testConnection();
+      setIsWooCommerceConnected(true);
+      toast({
+        title: "Conexão OK",
+        description: "Conexão com WooCommerce estabelecida com sucesso!",
+        variant: "default"
+      });
+    } catch (error) {
+      setIsWooCommerceConnected(false);
+      toast({
+        title: "Erro de Conexão",
+        description: "Não foi possível conectar com o WooCommerce. Verifique as configurações.",
+        variant: "destructive"
+      });
+    }
+  };
 
   // Função para determinar quais campos de medida mostrar baseado na categoria
   const getMedidasFields = () => {
@@ -285,6 +311,11 @@ const ProductForm = ({ open, onOpenChange, formData, setFormData, onSubmit, edit
       referencia: formData.referencia,
       image_url: mainImageUrl,
       variations: formData.product_type === PRODUCT_TYPES.VARIABLE ? processedVariations : [],
+      // Tratar campos numéricos
+      price: parseFloat(formData.price) || 0,
+      price_varejo: parseFloat(formData.price_varejo) || 0,
+      price_atacado: parseFloat(formData.price_atacado) || 0,
+      price_atacarejo: parseFloat(formData.price_atacarejo) || 0,
       weight: parseFloat(formData.weight) || null,
       length: parseFloat(formData.length) || null,
       height: parseFloat(formData.height) || null,
@@ -296,7 +327,15 @@ const ProductForm = ({ open, onOpenChange, formData, setFormData, onSubmit, edit
     } else {
         payload.stock = parseInt(formData.stock) || 0;
     }
-    onSubmit(payload, uploadedImageUrls); 
+
+    // Adicionar flag de sincronização e imagens ao payload
+    const finalPayload = {
+      ...payload,
+      syncWithWooCommerce: syncWithWooCommerce && isWooCommerceConnected,
+      uploadedImageUrls: uploadedImageUrls
+    };
+
+    onSubmit(finalPayload, uploadedImageUrls); 
   };
 
   const handleShareStock = async () => {
@@ -342,9 +381,11 @@ const ProductForm = ({ open, onOpenChange, formData, setFormData, onSubmit, edit
       <DialogTrigger asChild>
         <Button><Plus className="w-4 h-4 mr-2" />Novo Produto</Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl">
-        <DialogHeader><DialogTitle>{editingProduct ? 'Editar Produto' : 'Novo Produto'}</DialogTitle></DialogHeader>
-        <form onSubmit={handleFormSubmit} className="space-y-6 max-h-[80vh] overflow-y-auto p-2">
+      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle>{editingProduct ? 'Editar Produto' : 'Novo Produto'}</DialogTitle>
+        </DialogHeader>
+        <form id="product-form" onSubmit={handleFormSubmit} className="flex-1 overflow-y-auto space-y-6 p-2 pr-4">
                     <ProductFormFields
             formData={formData}
             handleInputChange={handleInputChange}
@@ -408,6 +449,49 @@ const ProductForm = ({ open, onOpenChange, formData, setFormData, onSubmit, edit
             />
           )}
 
+          {/* Seção WooCommerce */}
+          <div className="pt-4 border-t mt-4">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-lg font-medium">Integração WooCommerce</h3>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                onClick={testWooCommerceConnection}
+              >
+                Testar Conexão
+              </Button>
+            </div>
+            <div className="p-4 border rounded-md bg-muted/30">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={syncWithWooCommerce}
+                    onCheckedChange={setSyncWithWooCommerce}
+                    disabled={!isWooCommerceConnected}
+                  />
+                  <Label>Sincronizar com WooCommerce</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className={`w-2 h-2 rounded-full ${isWooCommerceConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                  <span className="text-sm text-muted-foreground">
+                    {isWooCommerceConnected ? 'Conectado' : 'Desconectado'}
+                  </span>
+                </div>
+              </div>
+              {woocommerceId && (
+                <div className="text-sm text-muted-foreground">
+                  ID WooCommerce: {woocommerceId}
+                </div>
+              )}
+              {!isWooCommerceConnected && (
+                <div className="text-sm text-orange-600 dark:text-orange-400">
+                  Clique em "Testar Conexão" para verificar a integração com WooCommerce.
+                </div>
+              )}
+            </div>
+          </div>
+
           {editingProduct && canShareStock && (
             <div className="pt-4 border-t mt-4">
               <div className="flex justify-between items-center mb-2">
@@ -437,8 +521,17 @@ const ProductForm = ({ open, onOpenChange, formData, setFormData, onSubmit, edit
               )}
             </div>
           )}
-          <div className="flex justify-end space-x-2 pt-6 border-t"><Button type="button" variant="outline" onClick={handleDialogClose}>Cancelar</Button><Button type="submit">{editingProduct ? 'Atualizar' : 'Criar'} Produto</Button></div>
         </form>
+        
+        {/* Botões de ação fixos na parte inferior */}
+        <div className="flex justify-end space-x-2 pt-4 border-t mt-4 bg-background">
+          <Button type="button" variant="outline" onClick={handleDialogClose}>
+            Cancelar
+          </Button>
+          <Button type="submit" form="product-form">
+            {editingProduct ? 'Atualizar' : 'Criar'} Produto
+          </Button>
+        </div>
         {/* Botão para abrir modal de medidas */}
         <Button type="button" variant="outline" className="mt-2" onClick={() => setShowMedidasModal(true)}>
           Adicionar Medidas

@@ -186,7 +186,7 @@ const ProductDetail = () => {
               <p><strong>Preço Principal:</strong> R$ {product.price?.toFixed(2)}</p>
               <p><strong>Preço Varejo:</strong> {product.price_varejo ? `R$ ${product.price_varejo.toFixed(2)}` : 'N/A'}</p>
               <p><strong>Preço Atacado:</strong> {product.price_atacado ? `R$ ${product.price_atacado.toFixed(2)}` : 'N/A'}</p>
-              <p><strong>Preço Atacarejo:</strong> {product.price_atacarejo ? `R$ ${product.price_atacarejo.toFixed(2)}` : 'N/A'}</p>
+              <p><strong>Preço Cliente Exclusivo:</strong> {product.price_atacarejo ? `R$ ${product.price_atacarejo.toFixed(2)}` : 'N/A'}</p>
             </CardContent>
           </Card>
 
@@ -277,7 +277,7 @@ const ProductDetail = () => {
                         <p><strong>Preço Específico:</strong> {variation.price ? `R$ ${variation.price.toFixed(2)}` : 'Usar preço principal'}</p>
                         <p><strong>Preço Varejo:</strong> {variation.price_varejo ? `R$ ${variation.price_varejo}` : 'N/A'}</p>
                         <p><strong>Preço Atacado:</strong> {variation.price_atacado ? `R$ ${variation.price_atacado}` : 'N/A'}</p>
-                        <p><strong>Preço Atacarejo:</strong> {variation.price_atacarejo ? `R$ ${variation.price_atacarejo}` : 'N/A'}</p>
+                        <p><strong>Preço Cliente Exclusivo:</strong> {variation.price_atacarejo ? `R$ ${variation.price_atacarejo}` : 'N/A'}</p>
                         <p className="font-medium"><strong>Estoque da Variação:</strong> {variation.stock} unidades</p>
                         {variation.medidas && (
                           <div className="mt-2">

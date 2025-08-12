@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { User as UserIcon, Edit, Trash2, FileText, Phone, Mail } from 'lucide-react';
+import { User as UserIcon, Edit, Trash2, FileText, Phone, Mail, UserCheck } from 'lucide-react';
 
 const CustomerList = ({ customers, onEdit, onDelete, onViewHistory, getCustomerPurchases, getCustomerTotalSpent, formatCPF, formatPhone }) => {
   if (customers.length === 0) {
@@ -84,6 +84,14 @@ const CustomerList = ({ customers, onEdit, onDelete, onViewHistory, getCustomerP
                     <div className="flex items-center space-x-2 text-sm">
                       <Mail className="w-3 h-3 text-muted-foreground" />
                       <span className="truncate">{customer.email}</span>
+                    </div>
+                  )}
+                  {customer.customer_groups && (
+                    <div className="flex items-center space-x-2 text-sm">
+                      <UserCheck className="w-3 h-3 text-blue-600" />
+                      <span className="text-blue-600 font-medium">
+                        {customer.customer_groups.name}
+                      </span>
                     </div>
                   )}
                 </div>

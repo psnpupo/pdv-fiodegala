@@ -14,7 +14,7 @@ const SalesTab = ({ sales, salesByHour }) => {
         </CardHeader>
         <CardContent>
           {sales.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-8 text-gray-400">
               <ShoppingCart className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p>Nenhuma venda no período selecionado</p>
             </div>
@@ -27,16 +27,16 @@ const SalesTab = ({ sales, salesByHour }) => {
                 >
                   <div>
                     <p className="font-medium">Venda #{sale.id}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {sale.cashier} • {new Date(sale.date).toLocaleString()}
+                    <p className="text-sm text-gray-400">
+                      {sale.cashier || sale.cashier_name || 'Vendedor'} • {new Date(sale.date || sale.created_at).toLocaleString()}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      {sale.items.length} itens
+                    <p className="text-xs text-gray-400">
+                      {(sale.items || sale.sale_items || []).length} itens
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-green-600">
-                      R$ {sale.total.toFixed(2)}
+                      R$ {(sale.total || sale.total_amount || 0).toFixed(2)}
                     </p>
                   </div>
                 </div>
@@ -55,7 +55,7 @@ const SalesTab = ({ sales, salesByHour }) => {
         </CardHeader>
         <CardContent>
           {Object.keys(salesByHour).length === 0 ? (
-             <div className="text-center py-8 text-muted-foreground">
+             <div className="text-center py-8 text-gray-400">
               <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p>Nenhuma venda por horário no período</p>
             </div>

@@ -75,7 +75,7 @@ const ProductList = ({ products, onEdit, onDelete, stores, currentUser }) => {
                     <Button variant="ghost" size="icon" onClick={() => onEdit(product)}>
                       <Edit className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => onDelete(product.id)} className="text-destructive hover:text-destructive" >
+                    <Button variant="ghost" size="icon" onClick={() => onDelete(product)} className="text-destructive hover:text-destructive" >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>

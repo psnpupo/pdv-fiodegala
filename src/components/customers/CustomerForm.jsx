@@ -1,12 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus } from 'lucide-react'; // Corrigido: UserIcon para Plus para manter a semântica do botão
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus } from 'lucide-react';
+import customerGroupsStorage from '../../lib/customerGroupsStorage';
 
 const CustomerForm = ({ open, onOpenChange, formData, setFormData, onSubmit, editingCustomer, formatCPF, formatPhone, resetForm }) => {
   const [cepLoading, setCepLoading] = useState(false);
+  const [customerGroups, setCustomerGroups] = useState([]);
+
+  // Buscar grupos de clientes
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const groups = await customerGroupsStorage.getCustomerGroups();
+        setCustomerGroups(groups);
+      } catch (error) {
+        console.error('Erro ao buscar grupos:', error);
+      }
+    };
+    fetchGroups();
+  }, []);
 
   // Busca dados do ViaCEP
   const handleCepBlur = async (e) => {
@@ -32,8 +48,8 @@ const CustomerForm = ({ open, onOpenChange, formData, setFormData, onSubmit, edi
     }
   };
 
-  // Exibe campos de empresa se categoria for Atacado ou Atacarejo
-  const showCompanyFields = formData.category === 'Atacado' || formData.category === 'Atacarejo';
+  // Exibe campos de empresa se categoria for Atacado ou Cliente Exclusivo
+const showCompanyFields = formData.category === 'Atacado' || formData.category === 'Cliente Exclusivo';
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
@@ -102,8 +118,32 @@ const CustomerForm = ({ open, onOpenChange, formData, setFormData, onSubmit, edi
                 <option value="">Selecione...</option>
                 <option value="Varejo">Varejo</option>
                 <option value="Atacado">Atacado</option>
-                <option value="Atacarejo">Atacarejo</option>
+                <option value="Cliente Exclusivo">Cliente Exclusivo</option>
               </select>
+            </div>
+
+            {/* Grupo de Clientes */}
+            <div className="md:col-span-2">
+              <Label htmlFor="group_id">Nível de Comprador</Label>
+              <Select
+                value={formData.group_id || ''}
+                onValueChange={(value) => setFormData({...formData, group_id: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um grupo..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Nenhum grupo</SelectItem>
+                  {customerGroups.map((group) => (
+                    <SelectItem key={group.id} value={group.id}>
+                      {group.name} - {new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                      }).format(group.average_ticket)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             {/* Campos de empresa */}
             {showCompanyFields && <>

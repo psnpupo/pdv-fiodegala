@@ -18,7 +18,9 @@ import {
   X,
   LogOut,
   DollarSign,
-  Warehouse
+  Warehouse,
+  CreditCard,
+  UserCheck
 } from 'lucide-react';
 
 const Layout = ({ onLogout }) => {
@@ -64,6 +66,13 @@ const Layout = ({ onLogout }) => {
       permission: PERMISSIONS.MANAGE_PRODUCTS 
     },
     {
+      id: 'customer-groups',
+      label: 'Níveis de Comprador',
+      icon: UserCheck,
+      path: '/customer-groups',
+      permission: PERMISSIONS.MANAGE_PRODUCTS 
+    },
+    {
       id: 'reports',
       label: 'Relatórios',
       icon: BarChart3,
@@ -89,6 +98,13 @@ const Layout = ({ onLogout }) => {
       label: 'Periféricos',
       icon: Printer,
       path: '/peripherals',
+      permission: PERMISSIONS.MANAGE_USERS
+    },
+    {
+      id: 'interest-rates',
+      label: 'Taxas de Juros',
+      icon: CreditCard,
+      path: '/interest-rates',
       permission: PERMISSIONS.MANAGE_USERS
     }
   ];
