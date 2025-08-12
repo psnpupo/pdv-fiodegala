@@ -37,9 +37,17 @@ export class CustomerGroupsStorage {
   // Criar novo grupo de clientes
   async createCustomerGroup(groupData) {
     try {
+      const insertData = {
+        name: groupData.name,
+        category: 'Varejo', // Categoria padrão fixa
+        ticket_min: groupData.average_ticket || null, // Usar ticket_min para armazenar o valor médio
+        ticket_max: null, // Não usar ticket_max
+        description: groupData.description || null
+      };
+
       const { data, error } = await supabase
         .from('customer_groups')
-        .insert([groupData])
+        .insert([insertData])
         .select()
         .single();
 
@@ -54,9 +62,17 @@ export class CustomerGroupsStorage {
   // Atualizar grupo de clientes
   async updateCustomerGroup(id, groupData) {
     try {
+      const updateData = {
+        name: groupData.name,
+        category: 'Varejo', // Categoria padrão fixa
+        ticket_min: groupData.average_ticket || null, // Usar ticket_min para armazenar o valor médio
+        ticket_max: null, // Não usar ticket_max
+        description: groupData.description || null
+      };
+
       const { data, error } = await supabase
         .from('customer_groups')
-        .update(groupData)
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();

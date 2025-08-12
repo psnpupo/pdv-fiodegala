@@ -11,7 +11,7 @@ const CustomerGroupForm = ({ isOpen, onClose, editingGroup = null, onSuccess }) 
   const [formData, setFormData] = useState({
     name: '',
     average_ticket: '',
-    observations: ''
+    description: ''
   });
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -20,14 +20,14 @@ const CustomerGroupForm = ({ isOpen, onClose, editingGroup = null, onSuccess }) 
     if (editingGroup) {
       setFormData({
         name: editingGroup.name || '',
-        average_ticket: editingGroup.average_ticket ? editingGroup.average_ticket.toString() : '',
-        observations: editingGroup.observations || ''
+        average_ticket: editingGroup.ticket_min ? editingGroup.ticket_min.toString() : '',
+        description: editingGroup.description || ''
       });
     } else {
       setFormData({
         name: '',
         average_ticket: '',
-        observations: ''
+        description: ''
       });
     }
   }, [editingGroup, isOpen]);
@@ -79,22 +79,13 @@ const CustomerGroupForm = ({ isOpen, onClose, editingGroup = null, onSuccess }) 
       return;
     }
 
-    if (!formData.average_ticket.trim()) {
-      toast({
-        title: "Erro",
-        description: "Ticket médio é obrigatório",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setLoading(true);
 
     try {
       const groupData = {
         name: formData.name.trim(),
-        average_ticket: parseCurrency(formData.average_ticket),
-        observations: formData.observations.trim()
+        average_ticket: formData.average_ticket ? parseCurrency(formData.average_ticket) : null,
+        description: formData.description.trim() || null
       };
 
       if (editingGroup) {
@@ -146,23 +137,24 @@ const CustomerGroupForm = ({ isOpen, onClose, editingGroup = null, onSuccess }) 
             />
           </div>
 
+
+
           <div className="space-y-2">
-            <Label htmlFor="average_ticket">Ticket Médio de Compra *</Label>
+            <Label htmlFor="average_ticket">Ticket Médio</Label>
             <Input
               id="average_ticket"
               value={formData.average_ticket}
               onChange={(e) => handleInputChange('average_ticket', e.target.value)}
               placeholder="R$ 0,00"
-              required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="observations">Observações</Label>
+            <Label htmlFor="description">Descrição</Label>
             <Textarea
-              id="observations"
-              value={formData.observations}
-              onChange={(e) => handleInputChange('observations', e.target.value)}
+              id="description"
+              value={formData.description}
+              onChange={(e) => handleInputChange('description', e.target.value)}
               placeholder="Informações adicionais sobre o grupo..."
               rows={3}
             />

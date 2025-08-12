@@ -2,9 +2,20 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { User as UserIcon, Edit, Trash2, FileText, Phone, Mail, UserCheck } from 'lucide-react';
+import { User as UserIcon, Edit, Trash2, FileText, Phone, Mail, UserCheck, Building2 } from 'lucide-react';
 
 const CustomerList = ({ customers, onEdit, onDelete, onViewHistory, getCustomerPurchases, getCustomerTotalSpent, formatCPF, formatPhone }) => {
+  // Função para formatar CNPJ
+  const formatCNPJ = (cnpj) => {
+    if (!cnpj) return '';
+    const numbers = cnpj.replace(/\D/g, '');
+    if (numbers.length > 14) numbers.slice(0, 14);
+    return numbers
+      .replace(/(\d{2})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1/$2')
+      .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+  };
   if (customers.length === 0) {
     return (
       <Card>
@@ -31,7 +42,7 @@ const CustomerList = ({ customers, onEdit, onDelete, onViewHistory, getCustomerP
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <Card className="glass-effect">
+            <Card>
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-2">
@@ -72,7 +83,13 @@ const CustomerList = ({ customers, onEdit, onDelete, onViewHistory, getCustomerP
                   {customer.cpf && 
                     <div className="flex items-center space-x-2 text-sm">
                       <UserIcon className="w-3 h-3 text-muted-foreground" />
-                      <span>{formatCPF(customer.cpf)}</span>
+                      <span>CPF: {formatCPF(customer.cpf)}</span>
+                    </div>
+                  }
+                  {customer.cnpj && 
+                    <div className="flex items-center space-x-2 text-sm">
+                      <Building2 className="w-3 h-3 text-muted-foreground" />
+                      <span>CNPJ: {formatCNPJ(customer.cnpj)}</span>
                     </div>
                   }
                   <div className="flex items-center space-x-2 text-sm">

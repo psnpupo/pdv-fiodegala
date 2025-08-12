@@ -31,7 +31,19 @@ const Customers = () => {
     cpf: '',
     phone: '',
     email: '',
-    address: ''
+    address: '',
+    category: '',
+    group_id: '',
+    cep: '',
+    street: '',
+    bairro: '',
+    cidade: '',
+    estado: '',
+    complemento: '',
+    cnpj: '',
+    razao_social: '',
+    inscricao_estadual: '',
+    nome_fantasia: ''
   });
 
   const fetchCustomersAndSales = useCallback(async () => {
@@ -69,7 +81,25 @@ const Customers = () => {
   });
 
   const resetForm = () => {
-    setFormData({ name: '', cpf: '', phone: '', email: '', address: '' });
+    setFormData({ 
+      name: '', 
+      cpf: '', 
+      phone: '', 
+      email: '', 
+      address: '',
+      category: '',
+      group_id: '',
+      cep: '',
+      street: '',
+      bairro: '',
+      cidade: '',
+      estado: '',
+      complemento: '',
+      cnpj: '',
+      razao_social: '',
+      inscricao_estadual: '',
+      nome_fantasia: ''
+    });
     setEditingCustomer(null);
   };
 
@@ -132,11 +162,23 @@ const Customers = () => {
   const handleEdit = (customer) => {
     setEditingCustomer(customer);
     setFormData({
-      name: customer.name,
+      name: customer.name || '',
       cpf: formatCPF(customer.cpf),
       phone: formatPhone(customer.phone),
-      email: customer.email,
-      address: customer.address || ''
+      email: customer.email || '',
+      address: customer.address || '',
+      category: customer.category || '',
+      group_id: customer.group_id || '',
+      cep: customer.cep || '',
+      street: customer.street || '',
+      bairro: customer.bairro || '',
+      cidade: customer.cidade || '',
+      estado: customer.estado || '',
+      complemento: customer.complemento || '',
+      cnpj: customer.cnpj || '',
+      razao_social: customer.razao_social || '',
+      inscricao_estadual: customer.inscricao_estadual || '',
+      nome_fantasia: customer.nome_fantasia || ''
     });
     setShowFormDialog(true);
   };
@@ -195,7 +237,7 @@ const Customers = () => {
 
       {/* Cards de resumo */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="glass-effect">
+        <Card>
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
               <Users className="w-8 h-8 text-blue-500" />
@@ -206,7 +248,7 @@ const Customers = () => {
             </div>
           </CardContent>
         </Card>
-        <Card className="glass-effect">
+        <Card>
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
               <UserIcon className="w-8 h-8 text-green-500" />
@@ -217,7 +259,7 @@ const Customers = () => {
             </div>
           </CardContent>
         </Card>
-        <Card className="glass-effect">
+        <Card>
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
               <UserIcon className="w-8 h-8 text-yellow-500" />
@@ -228,13 +270,13 @@ const Customers = () => {
             </div>
           </CardContent>
         </Card>
-        <Card className="glass-effect">
+        <Card>
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
               <UserIcon className="w-8 h-8 text-purple-500" />
               <div>
                 <p className="text-2xl font-bold">{totalClienteExclusivo}</p>
-<p className="text-sm text-muted-foreground">Clientes Exclusivos</p>
+                <p className="text-sm text-muted-foreground">Clientes Exclusivos</p>
               </div>
             </div>
           </CardContent>

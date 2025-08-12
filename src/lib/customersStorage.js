@@ -8,7 +8,7 @@ export const getCustomers = async () => {
       customer_groups (
         id,
         name,
-        average_ticket
+        ticket_min
       )
     `)
     .order('name', { ascending: true });

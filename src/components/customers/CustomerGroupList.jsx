@@ -153,14 +153,14 @@ const CustomerGroupList = () => {
                   <DollarSign className="w-4 h-4 text-green-600" />
                   <span className="text-sm text-gray-600">Ticket Médio:</span>
                   <span className="font-medium text-green-600">
-                    {formatCurrency(group.average_ticket)}
+                    {group.ticket_min ? formatCurrency(group.ticket_min) : 'Não definido'}
                   </span>
                 </div>
                 
-                {group.observations && (
+                {group.description && (
                   <div className="text-sm text-gray-600">
-                    <p className="font-medium mb-1">Observações:</p>
-                    <p className="text-gray-500">{group.observations}</p>
+                    <p className="font-medium mb-1">Descrição:</p>
+                    <p className="text-gray-500">{group.description}</p>
                   </div>
                 )}
                 

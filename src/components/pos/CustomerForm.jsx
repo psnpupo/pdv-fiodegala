@@ -120,10 +120,10 @@ const CustomerForm = ({ open, onOpenChange, onCustomerCreated }) => {
       return;
     }
 
-    if (showCompanyFields && (!formData.cnpj || !formData.razao_social)) {
+    if (showCompanyFields && (!formData.cnpj || !formData.razao_social || !formData.inscricao_estadual)) {
       toast({
         title: 'Campos obrigatórios',
-        description: 'CNPJ e Razão Social são obrigatórios para empresas.',
+        description: 'CNPJ, Razão Social e Inscrição Estadual são obrigatórios para empresas.',
         variant: 'destructive'
       });
       return;
@@ -131,7 +131,27 @@ const CustomerForm = ({ open, onOpenChange, onCustomerCreated }) => {
 
     setLoading(true);
     try {
-      const newCustomer = await addCustomer(formData);
+      // Limpar dados para enviar apenas campos que existem na tabela
+      const cleanData = {
+        name: formData.name,
+        cpf: formData.cpf,
+        phone: formData.phone,
+        email: formData.email,
+        category: formData.category,
+        group_id: formData.group_id === 'none' ? null : formData.group_id,
+        cep: formData.cep,
+        street: formData.street,
+        bairro: formData.bairro,
+        cidade: formData.cidade,
+        estado: formData.estado,
+        complemento: formData.complemento,
+        cnpj: formData.cnpj,
+        razao_social: formData.razao_social,
+        inscricao_estadual: formData.inscricao_estadual,
+        nome_fantasia: formData.nome_fantasia
+      };
+      
+      const newCustomer = await addCustomer(cleanData);
       if (newCustomer) {
         toast({
           title: 'Cliente criado com sucesso!',
@@ -247,13 +267,16 @@ const CustomerForm = ({ open, onOpenChange, onCustomerCreated }) => {
                   <SelectValue placeholder="Selecione um grupo..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhum grupo</SelectItem>
+                  <SelectItem value="none">Nenhum grupo</SelectItem>
                   {customerGroups.map((group) => (
                     <SelectItem key={group.id} value={group.id}>
-                      {group.name} - {new Intl.NumberFormat('pt-BR', {
-                        style: 'currency',
-                        currency: 'BRL'
-                      }).format(group.average_ticket)}
+                      {group.name} - {group.category}
+                      {group.ticket_min && (
+                        ` (${new Intl.NumberFormat('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL'
+                        }).format(group.ticket_min)})`
+                      )}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -268,17 +291,38 @@ const CustomerForm = ({ open, onOpenChange, onCustomerCreated }) => {
                   <Input
                     id="cnpj"
                     placeholder="00.000.000/0000-00"
-                    value={formData.cnpj}
+                    value={formData.cnpj || ''}
                     onChange={e => setFormData({...formData, cnpj: e.target.value})}
+                    required={showCompanyFields}
                   />
                 </div>
                 <div>
                   <Label htmlFor="razao_social">Razão Social *</Label>
                   <Input
                     id="razao_social"
-                    value={formData.razao_social}
+                    value={formData.razao_social || ''}
                     onChange={e => setFormData({...formData, razao_social: e.target.value})}
                     placeholder="Razão social da empresa"
+                    required={showCompanyFields}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="inscricao_estadual">Inscrição Estadual *</Label>
+                  <Input
+                    id="inscricao_estadual"
+                    value={formData.inscricao_estadual || ''}
+                    onChange={e => setFormData({...formData, inscricao_estadual: e.target.value})}
+                    placeholder="Inscrição estadual"
+                    required={showCompanyFields}
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <Label htmlFor="nome_fantasia">Nome Fantasia</Label>
+                  <Input
+                    id="nome_fantasia"
+                    value={formData.nome_fantasia || ''}
+                    onChange={e => setFormData({...formData, nome_fantasia: e.target.value})}
+                    placeholder="Nome fantasia da empresa"
                   />
                 </div>
               </>

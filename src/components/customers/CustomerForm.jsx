@@ -62,7 +62,7 @@ const showCompanyFields = formData.category === 'Atacado' || formData.category =
           Novo Cliente
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {editingCustomer ? 'Editar Cliente' : 'Novo Cliente'}
@@ -108,18 +108,19 @@ const showCompanyFields = formData.category === 'Atacado' || formData.category =
             {/* Categoria do cliente */}
             <div className="md:col-span-2">
               <Label htmlFor="category">Categoria *</Label>
-              <select
-                id="category"
+              <Select
                 value={formData.category || ''}
-                onChange={e => setFormData({...formData, category: e.target.value})}
-                className="bg-background/70 border-none text-white rounded-xl px-3 py-2 w-full"
-                required
+                onValueChange={(value) => setFormData({...formData, category: value})}
               >
-                <option value="">Selecione...</option>
-                <option value="Varejo">Varejo</option>
-                <option value="Atacado">Atacado</option>
-                <option value="Cliente Exclusivo">Cliente Exclusivo</option>
-              </select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a categoria..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Varejo">Varejo</SelectItem>
+                  <SelectItem value="Atacado">Atacado</SelectItem>
+                  <SelectItem value="Cliente Exclusivo">Cliente Exclusivo</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Grupo de Clientes */}
@@ -133,57 +134,62 @@ const showCompanyFields = formData.category === 'Atacado' || formData.category =
                   <SelectValue placeholder="Selecione um grupo..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhum grupo</SelectItem>
+                  <SelectItem value="none">Nenhum grupo</SelectItem>
                   {customerGroups.map((group) => (
                     <SelectItem key={group.id} value={group.id}>
-                      {group.name} - {new Intl.NumberFormat('pt-BR', {
+                      {group.name} - {group.ticket_min ? new Intl.NumberFormat('pt-BR', {
                         style: 'currency',
                         currency: 'BRL'
-                      }).format(group.average_ticket)}
+                      }).format(group.ticket_min) : 'Sem valor definido'}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             {/* Campos de empresa */}
-            {showCompanyFields && <>
-              <div>
-                <Label htmlFor="cnpj">CNPJ *</Label>
-                <Input
-                  id="cnpj"
-                  placeholder="00.000.000/0000-00"
-                  value={formData.cnpj || ''}
-                  onChange={e => setFormData({...formData, cnpj: e.target.value})}
-                  required={showCompanyFields}
-                />
-              </div>
-              <div>
-                <Label htmlFor="razao_social">Razão Social *</Label>
-                <Input
-                  id="razao_social"
-                  value={formData.razao_social || ''}
-                  onChange={e => setFormData({...formData, razao_social: e.target.value})}
-                  required={showCompanyFields}
-                />
-              </div>
-              <div>
-                <Label htmlFor="inscricao_estadual">Inscrição Estadual *</Label>
-                <Input
-                  id="inscricao_estadual"
-                  value={formData.inscricao_estadual || ''}
-                  onChange={e => setFormData({...formData, inscricao_estadual: e.target.value})}
-                  required={showCompanyFields}
-                />
-              </div>
-              <div className="md:col-span-2">
-                <Label htmlFor="nome_fantasia">Nome Fantasia</Label>
-                <Input
-                  id="nome_fantasia"
-                  value={formData.nome_fantasia || ''}
-                  onChange={e => setFormData({...formData, nome_fantasia: e.target.value})}
-                />
-              </div>
-            </>}
+            {showCompanyFields && (
+              <>
+                <div>
+                  <Label htmlFor="cnpj">CNPJ *</Label>
+                  <Input
+                    id="cnpj"
+                    placeholder="00.000.000/0000-00"
+                    value={formData.cnpj || ''}
+                    onChange={e => setFormData({...formData, cnpj: e.target.value})}
+                    required={showCompanyFields}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="razao_social">Razão Social *</Label>
+                  <Input
+                    id="razao_social"
+                    value={formData.razao_social || ''}
+                    onChange={e => setFormData({...formData, razao_social: e.target.value})}
+                    placeholder="Razão social da empresa"
+                    required={showCompanyFields}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="inscricao_estadual">Inscrição Estadual *</Label>
+                  <Input
+                    id="inscricao_estadual"
+                    value={formData.inscricao_estadual || ''}
+                    onChange={e => setFormData({...formData, inscricao_estadual: e.target.value})}
+                    placeholder="Inscrição estadual"
+                    required={showCompanyFields}
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <Label htmlFor="nome_fantasia">Nome Fantasia</Label>
+                  <Input
+                    id="nome_fantasia"
+                    value={formData.nome_fantasia || ''}
+                    onChange={e => setFormData({...formData, nome_fantasia: e.target.value})}
+                    placeholder="Nome fantasia da empresa"
+                  />
+                </div>
+              </>
+            )}
             {/* Endereço completo */}
             <div>
               <Label htmlFor="cep">CEP *</Label>
