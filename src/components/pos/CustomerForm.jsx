@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus } from 'lucide-react';
 import { addCustomer } from '@/lib/customersStorage';
 import { useToast } from '@/components/ui/use-toast';
+import customerGroupsStorage from '@/lib/customerGroupsStorage';
 
 const CustomerForm = ({ open, onOpenChange, onCustomerCreated }) => {
   const { toast } = useToast();
@@ -17,6 +18,7 @@ const CustomerForm = ({ open, onOpenChange, onCustomerCreated }) => {
     phone: '',
     email: '',
     category: '',
+    group_id: '',
     cep: '',
     street: '',
     bairro: '',
@@ -26,6 +28,7 @@ const CustomerForm = ({ open, onOpenChange, onCustomerCreated }) => {
   });
   const [loading, setLoading] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
+  const [customerGroups, setCustomerGroups] = useState([]);
 
   // Resetar formulário quando abrir
   useEffect(() => {
@@ -37,6 +40,7 @@ const CustomerForm = ({ open, onOpenChange, onCustomerCreated }) => {
         phone: '',
         email: '',
         category: '',
+        group_id: '',
         cep: '',
         street: '',
         bairro: '',
@@ -46,6 +50,19 @@ const CustomerForm = ({ open, onOpenChange, onCustomerCreated }) => {
       });
     }
   }, [open]);
+
+  // Carregar grupos de clientes
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const groups = await customerGroupsStorage.getCustomerGroups();
+        setCustomerGroups(groups);
+      } catch (error) {
+        console.error('Erro ao buscar grupos:', error);
+      }
+    };
+    fetchGroups();
+  }, []);
 
   // Formatar CPF
   const formatCPF = (value) => {
@@ -215,6 +232,30 @@ const CustomerForm = ({ open, onOpenChange, onCustomerCreated }) => {
                   <SelectItem value="Varejo">Varejo</SelectItem>
                   <SelectItem value="Atacado">Atacado</SelectItem>
                   <SelectItem value="Cliente Exclusivo">Cliente Exclusivo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Grupo de Clientes */}
+            <div className="md:col-span-2">
+              <Label htmlFor="group_id">Nível de Comprador</Label>
+              <Select
+                value={formData.group_id}
+                onValueChange={(value) => setFormData({...formData, group_id: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um grupo..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Nenhum grupo</SelectItem>
+                  {customerGroups.map((group) => (
+                    <SelectItem key={group.id} value={group.id}>
+                      {group.name} - {new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                      }).format(group.average_ticket)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

@@ -30,7 +30,6 @@ const CustomerList = ({ customers, onEdit, onDelete, onViewHistory, getCustomerP
             key={customer.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="card-hover"
           >
             <Card className="glass-effect">
               <CardHeader>
