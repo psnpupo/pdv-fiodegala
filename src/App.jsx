@@ -20,6 +20,7 @@ import FiscalDocuments from '@/components/fiscal/FiscalDocuments';
 import { getCurrentUser, hasPermission, PERMISSIONS, authenticateUser, setCurrentUser as setLocalCurrentUser, logout as localLogout } from '@/lib/auth';
 import { supabase } from '@/lib/supabaseClient';
 import { useToast } from '@/components/ui/use-toast';
+import { RecentProductsProvider } from '@/contexts/RecentProductsContext';
 
 
 const ProtectedRoute = ({ element, requiredPermission, user }) => {
@@ -125,41 +126,43 @@ function App() {
 
 
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={!user ? <Login onLogin={handleLogin} /> : <Navigate to="/" />} />
-        <Route 
-          path="/" 
-          element={
-            <ProtectedRoute user={user} element={<Layout onLogout={handleLogout} />} />
-          }
-        >
-          <Route index element={<ProtectedRoute user={user} element={<POS />} requiredPermission={PERMISSIONS.PROCESS_SALES} />} />
-          <Route path="pos" element={<ProtectedRoute user={user} element={<POS />} requiredPermission={PERMISSIONS.PROCESS_SALES} />} />
-          <Route path="products" element={<ProtectedRoute user={user} element={<Products />} requiredPermission={PERMISSIONS.MANAGE_PRODUCTS} />} />
-          <Route path="products/:id" element={<ProtectedRoute user={user} element={<ProductDetail />} requiredPermission={PERMISSIONS.MANAGE_PRODUCTS} />} />
-          <Route path="categories" element={<ProtectedRoute user={user} element={<Categories />} requiredPermission={PERMISSIONS.MANAGE_CATEGORIES} />} />
-          <Route path="stock" element={<ProtectedRoute user={user} element={<Stock />} requiredPermission={PERMISSIONS.MANAGE_STOCK} />} />
-          <Route path="customers" element={<ProtectedRoute user={user} element={<Customers />} requiredPermission={PERMISSIONS.MANAGE_PRODUCTS} />} />
-          <Route path="customer-groups" element={<ProtectedRoute user={user} element={<CustomerGroups />} requiredPermission={PERMISSIONS.MANAGE_PRODUCTS} />} />
-          <Route path="reports" element={<ProtectedRoute user={user} element={<Reports />} requiredPermission={PERMISSIONS.VIEW_REPORTS} />} />
-          <Route path="users" element={<ProtectedRoute user={user} element={<Users />} requiredPermission={PERMISSIONS.MANAGE_USERS} />} />
-          <Route path="cash-register" element={<ProtectedRoute user={user} element={<CashRegister />} requiredPermission={PERMISSIONS.CASH_REGISTER_MANAGEMENT} />} />
-          <Route path="peripherals" element={<ProtectedRoute user={user} element={<PeripheralSettings />} requiredPermission={PERMISSIONS.MANAGE_USERS} />} />
-          <Route path="interest-rates" element={<ProtectedRoute user={user} element={<InterestRatesSettings />} requiredPermission={PERMISSIONS.MANAGE_USERS} />} />
+    <RecentProductsProvider>
+      <Router>
+        <Routes>
+          <Route path="/login" element={!user ? <Login onLogin={handleLogin} /> : <Navigate to="/" />} />
           <Route 
-            path="/fiscal-documents" 
+            path="/" 
             element={
-              <ProtectedRoute permission={PERMISSIONS.MANAGE_FISCAL_DOCUMENTS}>
-                <FiscalDocuments />
-              </ProtectedRoute>
-            } 
-          />
-          <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />
-        </Route>
-      </Routes>
-      <Toaster />
-    </Router>
+              <ProtectedRoute user={user} element={<Layout onLogout={handleLogout} />} />
+            }
+          >
+            <Route index element={<ProtectedRoute user={user} element={<POS />} requiredPermission={PERMISSIONS.PROCESS_SALES} />} />
+            <Route path="pos" element={<ProtectedRoute user={user} element={<POS />} requiredPermission={PERMISSIONS.PROCESS_SALES} />} />
+            <Route path="products" element={<ProtectedRoute user={user} element={<Products />} requiredPermission={PERMISSIONS.MANAGE_PRODUCTS} />} />
+            <Route path="products/:id" element={<ProtectedRoute user={user} element={<ProductDetail />} requiredPermission={PERMISSIONS.MANAGE_PRODUCTS} />} />
+            <Route path="categories" element={<ProtectedRoute user={user} element={<Categories />} requiredPermission={PERMISSIONS.MANAGE_CATEGORIES} />} />
+            <Route path="stock" element={<ProtectedRoute user={user} element={<Stock />} requiredPermission={PERMISSIONS.MANAGE_STOCK} />} />
+            <Route path="customers" element={<ProtectedRoute user={user} element={<Customers />} requiredPermission={PERMISSIONS.MANAGE_PRODUCTS} />} />
+            <Route path="customer-groups" element={<ProtectedRoute user={user} element={<CustomerGroups />} requiredPermission={PERMISSIONS.MANAGE_PRODUCTS} />} />
+            <Route path="reports" element={<ProtectedRoute user={user} element={<Reports />} requiredPermission={PERMISSIONS.VIEW_REPORTS} />} />
+            <Route path="users" element={<ProtectedRoute user={user} element={<Users />} requiredPermission={PERMISSIONS.MANAGE_USERS} />} />
+            <Route path="cash-register" element={<ProtectedRoute user={user} element={<CashRegister />} requiredPermission={PERMISSIONS.CASH_REGISTER_MANAGEMENT} />} />
+            <Route path="peripherals" element={<ProtectedRoute user={user} element={<PeripheralSettings />} requiredPermission={PERMISSIONS.MANAGE_USERS} />} />
+            <Route path="interest-rates" element={<ProtectedRoute user={user} element={<InterestRatesSettings />} requiredPermission={PERMISSIONS.MANAGE_USERS} />} />
+            <Route 
+              path="/fiscal-documents" 
+              element={
+                <ProtectedRoute permission={PERMISSIONS.MANAGE_FISCAL_DOCUMENTS}>
+                  <FiscalDocuments />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />
+          </Route>
+        </Routes>
+        <Toaster />
+      </Router>
+    </RecentProductsProvider>
   );
 };
 

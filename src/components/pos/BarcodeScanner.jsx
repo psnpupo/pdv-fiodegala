@@ -5,9 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Scan, Plus } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { getProductByBarcode } from '@/lib/salesApi';
+import { useRecentProducts } from '@/contexts/RecentProductsContext';
 
 const BarcodeScanner = ({ onProductFound }) => {
   const [barcode, setBarcode] = useState('');
+  const { recentProducts, loading, refreshRecentProducts } = useRecentProducts();
   const { toast } = useToast();
 
   const handleBarcodeSubmit = async (e) => {
@@ -35,27 +37,26 @@ const BarcodeScanner = ({ onProductFound }) => {
     }
   };
   
-  const quickAddProduct = async (testBarcode) => {
+  const quickAddProduct = async (productBarcode) => {
     try {
-      const result = await getProductByBarcode(testBarcode);
+      const result = await getProductByBarcode(productBarcode);
       if (result && result.product) {
         onProductFound(result.product);
       } else {
         toast({
-          title: "Produto de teste não encontrado",
-          description: `Código: ${testBarcode}`,
+          title: "Produto não encontrado",
+          description: `Código: ${productBarcode}`,
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
-        title: "Erro ao buscar produto de teste",
+        title: "Erro ao buscar produto",
         description: error.message,
         variant: "destructive",
       });
     }
   };
-
 
   return (
     <Card className="glass-effect">
@@ -79,28 +80,42 @@ const BarcodeScanner = ({ onProductFound }) => {
           </Button>
         </form>
         
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-2">
-          <Button 
-            variant="outline" 
-            onClick={() => quickAddProduct('6307CB')}
-            className="text-sm"
-          >
-            Camiseta Básica
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={() => quickAddProduct('7182CSR')}
-            className="text-sm"
-          >
-            Calça com Regulagem
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={() => quickAddProduct('4411GM')}
-            className="text-sm"
-          >
-            Gola Média
-          </Button>
+        <div className="mt-4">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-sm font-medium text-gray-300">Produtos Recentes</h4>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={refreshRecentProducts}
+              disabled={loading}
+              className="text-xs"
+            >
+              {loading ? 'Carregando...' : 'Atualizar'}
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            {recentProducts.length > 0 ? (
+              recentProducts.map((product) => (
+                <Button 
+                  key={product.id}
+                  variant="outline" 
+                  onClick={() => quickAddProduct(product.barcode)}
+                  className="text-sm h-auto p-2 flex flex-col items-center"
+                  disabled={loading}
+                >
+                  <span className="font-medium">{product.name}</span>
+                  <span className="text-xs text-gray-400 mt-1">
+                    R$ {product.price?.toFixed(2) || '0.00'}
+                  </span>
+                </Button>
+              ))
+            ) : (
+              <div className="col-span-3 text-center text-gray-400 text-sm py-4">
+                {loading ? 'Carregando produtos...' : 'Nenhum produto recente encontrado'}
+              </div>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

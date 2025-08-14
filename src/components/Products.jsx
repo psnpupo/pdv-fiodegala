@@ -12,6 +12,7 @@ import {
   deleteProduct // ADICIONADO
 } from '@/lib/productsStorage'; // Atualizado
 import { getCurrentUser, getStores } from '@/lib/auth'; // getStores importado de auth
+import { useRecentProducts } from '@/contexts/RecentProductsContext';
 import { Search, PackagePlus } from 'lucide-react';
 import ProductList from '@/components/products/ProductList';
 import ProductForm from '@/components/products/ProductForm';
@@ -26,6 +27,7 @@ const Products = () => {
   const [stores, setStoresData] = useState([]); // Renomeado para evitar conflito com import
   const { toast } = useToast();
   const currentUser = getCurrentUser();
+  const { refreshRecentProducts } = useRecentProducts();
 
   const [formData, setFormData] = useState({
     name: '', category: '', brand: '', barcode: '',
@@ -235,6 +237,7 @@ const Products = () => {
         }
       }
       fetchProductsAndStoresData();
+      refreshRecentProducts(); // Atualizar produtos recentes após criação/edição
       setShowFormDialog(false);
       resetForm();
     } catch (error) {
@@ -302,7 +305,8 @@ const Products = () => {
         toast({ title: "Produto excluído!", description: "O produto foi removido do sistema." });
       }
       
-      fetchProductsAndStoresData(); 
+      fetchProductsAndStoresData();
+      refreshRecentProducts(); // Atualizar produtos recentes após exclusão
     } catch (error) {
       toast({ title: "Erro ao excluir produto", description: error.message, variant: "destructive" });
     } finally {
