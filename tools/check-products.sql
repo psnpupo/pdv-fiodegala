@@ -40,3 +40,17 @@ SELECT
     COUNT(CASE WHEN active = true THEN 1 END) as active_products,
     COUNT(CASE WHEN active = false THEN 1 END) as inactive_products
 FROM products;
+
+-- Verificar produtos cadastrados no banco de dados
+SELECT 
+    id,
+    name,
+    barcode,
+    price,
+    active,
+    created_at,
+    store_id
+FROM products 
+WHERE active = true 
+ORDER BY created_at DESC 
+LIMIT 10;

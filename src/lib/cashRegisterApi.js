@@ -1,5 +1,5 @@
 // API para controle de caixa - integração com backend
-const BACKEND_URL = 'http://localhost:4000/api';
+import { BACKEND_URL } from './config.js';
 
 // Obter estado atual do caixa
 export const getCashRegisterState = async (storeId = null) => {

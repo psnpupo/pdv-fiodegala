@@ -200,6 +200,9 @@ export default defineConfig({
 		cors: true,
 		headers: {
 			'Cross-Origin-Embedder-Policy': 'credentialless',
+			'Cache-Control': 'no-cache, no-store, must-revalidate',
+			'Pragma': 'no-cache',
+			'Expires': '0'
 		},
 		allowedHosts: true,
 		proxy: {
@@ -223,7 +226,18 @@ export default defineConfig({
 				'@babel/traverse',
 				'@babel/generator',
 				'@babel/types'
-			]
-		}
+			],
+			output: {
+				entryFileNames: `assets/[name]-[hash].js`,
+				chunkFileNames: `assets/[name]-[hash].js`,
+				assetFileNames: `assets/[name]-[hash].[ext]`
+			}
+		},
+		outDir: 'dist',
+		assetsDir: 'assets',
+		emptyOutDir: true,
+		minify: 'terser',
+		sourcemap: false,
+		assetsInlineLimit: 0,
 	}
 });

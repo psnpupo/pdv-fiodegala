@@ -1,5 +1,41 @@
 // API para vendas - integração com backend
-const BACKEND_URL = 'http://localhost:4000/api';
+import { BACKEND_URL } from './config.js';
+
+// Função auxiliar para criar um fetch com timeout
+const fetchWithTimeout = async (url, options = {}, timeout = 10000) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error('Timeout: A requisição demorou muito para responder');
+    }
+    throw error;
+  }
+};
+
+// Função auxiliar para retry
+const retryFetch = async (fetchFn, maxRetries = 3, delay = 1000) => {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await fetchFn();
+    } catch (error) {
+      if (attempt === maxRetries) {
+        throw error;
+      }
+      console.warn(`Tentativa ${attempt} falhou, tentando novamente em ${delay}ms...`, error.message);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+};
 
 // Buscar produto por código de barras
 export const getProductByBarcode = async (code, storeId = null, modalidade = 'varejo') => {
@@ -9,21 +45,36 @@ export const getProductByBarcode = async (code, storeId = null, modalidade = 'va
     if (storeId) params.append('store_id', storeId);
     if (modalidade) params.append('modalidade', modalidade);
 
-    const response = await fetch(`${BACKEND_URL}/sales/products/barcode/${code}?${params}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    const url = `${BACKEND_URL}/sales/products/barcode/${code}?${params}`;
+    
+    const response = await retryFetch(async () => {
+      return await fetchWithTimeout(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }, 15000); // 15 segundos de timeout
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Erro ao buscar produto');
+      const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
+      throw new Error(errorData.error || `Erro HTTP ${response.status}: ${response.statusText}`);
     }
 
     return await response.json();
   } catch (error) {
-    throw new Error(`Erro na comunicação com o backend: ${error.message}`);
+    console.error('Erro ao buscar produto por código de barras:', error);
+    
+    // Mensagens de erro mais específicas
+    if (error.message.includes('Timeout')) {
+      throw new Error('Servidor não respondeu a tempo. Verifique sua conexão e tente novamente.');
+    } else if (error.message.includes('Failed to fetch')) {
+      throw new Error('Erro de conexão com o servidor. Verifique se o backend está rodando.');
+    } else if (error.message.includes('NetworkError')) {
+      throw new Error('Erro de rede. Verifique sua conexão com a internet.');
+    } else {
+      throw new Error(`Erro na comunicação com o backend: ${error.message}`);
+    }
   }
 };
 

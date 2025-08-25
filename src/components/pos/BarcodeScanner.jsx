@@ -9,19 +9,29 @@ import { useRecentProducts } from '@/contexts/RecentProductsContext';
 
 const BarcodeScanner = ({ onProductFound }) => {
   const [barcode, setBarcode] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { recentProducts, loading, refreshRecentProducts } = useRecentProducts();
   const { toast } = useToast();
 
   const handleBarcodeSubmit = async (e) => {
     e.preventDefault();
-    if (!barcode.trim()) return;
+    if (!barcode.trim() || isLoading) return;
 
+    setIsLoading(true);
     try {
+      console.log('🔍 Buscando produto com código:', barcode);
       const result = await getProductByBarcode(barcode);
+      
       if (result && result.product) {
+        console.log('✅ Produto encontrado:', result.product.name);
         onProductFound(result.product);
         setBarcode('');
+        toast({
+          title: "Produto adicionado!",
+          description: `${result.product.name} foi adicionado ao carrinho.`,
+        });
       } else {
+        console.log('❌ Produto não encontrado para código:', barcode);
         toast({
           title: "Produto não encontrado",
           description: `Código de barras: ${barcode}`,
@@ -29,20 +39,34 @@ const BarcodeScanner = ({ onProductFound }) => {
         });
       }
     } catch (error) {
+      console.error('❌ Erro ao buscar produto:', error);
       toast({
         title: "Erro ao buscar produto",
-        description: error.message,
+        description: error.message || "Erro desconhecido ao buscar produto",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
   
   const quickAddProduct = async (productBarcode) => {
+    if (isLoading) return;
+    
+    setIsLoading(true);
     try {
+      console.log('🔍 Adicionando produto recente:', productBarcode);
       const result = await getProductByBarcode(productBarcode);
+      
       if (result && result.product) {
+        console.log('✅ Produto recente adicionado:', result.product.name);
         onProductFound(result.product);
+        toast({
+          title: "Produto adicionado!",
+          description: `${result.product.name} foi adicionado ao carrinho.`,
+        });
       } else {
+        console.log('❌ Produto recente não encontrado:', productBarcode);
         toast({
           title: "Produto não encontrado",
           description: `Código: ${productBarcode}`,
@@ -50,11 +74,14 @@ const BarcodeScanner = ({ onProductFound }) => {
         });
       }
     } catch (error) {
+      console.error('❌ Erro ao adicionar produto recente:', error);
       toast({
-        title: "Erro ao buscar produto",
-        description: error.message,
+        title: "Erro ao adicionar produto",
+        description: error.message || "Erro desconhecido ao adicionar produto",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -74,9 +101,14 @@ const BarcodeScanner = ({ onProductFound }) => {
             onChange={(e) => setBarcode(e.target.value)}
             className="flex-1 barcode-scanner"
             autoFocus
+            disabled={isLoading}
           />
-          <Button type="submit">
-            <Plus className="w-4 h-4" />
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Plus className="w-4 h-4" />
+            )}
           </Button>
         </form>
         
@@ -87,7 +119,7 @@ const BarcodeScanner = ({ onProductFound }) => {
               variant="ghost" 
               size="sm" 
               onClick={refreshRecentProducts}
-              disabled={loading}
+              disabled={loading || isLoading}
               className="text-xs"
             >
               {loading ? 'Carregando...' : 'Atualizar'}
@@ -102,7 +134,7 @@ const BarcodeScanner = ({ onProductFound }) => {
                   variant="outline" 
                   onClick={() => quickAddProduct(product.barcode)}
                   className="text-sm h-auto p-2 flex flex-col items-center"
-                  disabled={loading}
+                  disabled={loading || isLoading}
                 >
                   <span className="font-medium">{product.name}</span>
                   <span className="text-xs text-gray-400 mt-1">
